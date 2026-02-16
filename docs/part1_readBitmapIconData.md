@@ -8,6 +8,7 @@ Considering the theoretical CNN we instead get $\pi = 17$ (the number of decisio
 
 ### Are the functions/methods with high CC also very long in terms of LOC?
 
+For this function the NLOC is `110` which is quite long and reflects the high CC. However, one does not necessarily need to imply the other. For example, a function could have a high CC but be short if it has many decision points in a small amount of code such as switch statements. Similarly, a function could be long but have a low CC if it has few decision points.
 
 ### What is the purpose of these functions? Is it related to the high CC?
 
