@@ -15,5 +15,8 @@ The function `readBitmapIconData` is responsible for reading bitmap icon data an
 
 ### If your programming language uses exceptions: Are they taken into account by the tool? If you think of an exception as another possible branch (to the catch block or the end of the function), how is the CC affected?
 
+No, the tool does not take exceptions into account in its calculation of CC. This is discussed in the first question where we calculated the theoretical CCN considering the exit points from exceptions. If we consider exceptions as branches, then the CCN is no longer `21` but `15`. However, we do count `catch` blocks as decision points in our manual calculation.
 
 ### Is the documentation of the function clear about the different possible outcomes induced by different branches taken?
+The documentation of the function is not very clear about the different possible outcomes induced by different branches. There is no Javadoc comment so we only know the return type (`IconData`) and possible errors (`ImagingException`, `IOException`). 
+
