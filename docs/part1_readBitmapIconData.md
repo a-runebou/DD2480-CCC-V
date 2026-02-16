@@ -11,8 +11,7 @@ Considering the theoretical CNN we instead get $\pi = 17$ (the number of decisio
 For this function the NLOC is `110` which is quite long and reflects the high CC. However, one does not necessarily need to imply the other. For example, a function could have a high CC but be short if it has many decision points in a small amount of code such as switch statements. Similarly, a function could be long but have a low CC if it has few decision points.
 
 ### What is the purpose of these functions? Is it related to the high CC?
-
-
+The function `readBitmapIconData` is responsible for reading bitmap icon data and converts it into a usable `BufferedImage`. The high CC is directly related to its purpose since it must handle many conditional cases (different bit depths, compression modes, transparency formats and error checks). Essentially, the complexity comes from supporting multiple formats and ensuring that the function can handle various edge cases and errors gracefully.
 
 ### If your programming language uses exceptions: Are they taken into account by the tool? If you think of an exception as another possible branch (to the catch block or the end of the function), how is the CC affected?
 
