@@ -164,22 +164,33 @@ public abstract class AbstractImageDataReader {
 
 
     /**
-     * A simple class for tracking branch coverage in the code. This is not intended for 
+     * A simple class for tracking branch coverage in the code. This is not intended for
      * production use, but rather as a tool for part 2 of the assignment.
      */
     public static class CoverageTracker {
-        public static boolean[] branches = new boolean[22];
+
+        /** Constructs a new coverage tracker. */
+        public CoverageTracker() {
+        }
+
+        static final boolean[] branches = new boolean[22];
 
         // Register a shutdown hook to report coverage when the JVM exits
         static {
-            System.out.println("CoverageTracker loaded");
             Runtime.getRuntime().addShutdownHook(new Thread(CoverageTracker::report));
         }
 
+        /**
+         * Marks a branch as executed.
+         * @param i branch id (0-based index)
+         */
         public static void mark(int i) {
             branches[i] = true;
         }
 
+        /**
+         * Prints the coverage report to stdout.
+         */
         public static void report() {
             for (int i = 0; i < branches.length; i++) {
                 System.out.println("Branch " + i + ": " + (branches[i] ? "covered" : "not covered"));
@@ -429,44 +440,37 @@ public abstract class AbstractImageDataReader {
      */
     void transferBlockToRaster(final int xBlock, final int yBlock, final int blockWidth, final int blockHeight, final int[] blockData, final int xRaster,
             final int yRaster, final int rasterWidth, final int rasterHeight, final int samplesPerPixel, final float[] rasterData) {
-
         // xR0, yR0 are the coordinates within the raster (upper-left corner)
         // xR1, yR1 are ONE PAST the coordinates of the lower-right corner
         int xR0 = xBlock - xRaster; // xR0, yR0 coordinates relative to
         int yR0 = yBlock - yRaster; // the raster
         int xR1 = xR0 + blockWidth;
         int yR1 = yR0 + blockHeight;
-
         CoverageTracker.mark(0);
-        
         if (xR0 < 0) {
             xR0 = 0;
             CoverageTracker.mark(1);
         } else {
             CoverageTracker.mark(2);
         }
-        
         if (yR0 < 0) {
             yR0 = 0;
             CoverageTracker.mark(3);
         } else {
             CoverageTracker.mark(4);
         }
-        
         if (xR1 > rasterWidth) {
             xR1 = rasterWidth;
             CoverageTracker.mark(5);
         } else {
             CoverageTracker.mark(6);
         }
-        
         if (yR1 > rasterHeight) {
             yR1 = rasterHeight;
             CoverageTracker.mark(7);
         } else {
             CoverageTracker.mark(8);
         }
-
         // Recall that the above logic may have adjusted xR0, xY0 so that
         // they are not necessarily point to the source pixel at xRaster, yRaster
         // we compute xSource = xR0+xRaster.
@@ -475,7 +479,6 @@ public abstract class AbstractImageDataReader {
         // we check for negatives and adjust xR0, yR0 upward as necessary
         int xB0 = xR0 + xRaster - xBlock;
         int yB0 = yR0 + yRaster - yBlock;
-        
         if (xB0 < 0) {
             xR0 -= xB0;
             xB0 = 0;
@@ -483,7 +486,6 @@ public abstract class AbstractImageDataReader {
         } else {
             CoverageTracker.mark(10);
         }
-        
         if (yB0 < 0) {
             yR0 -= yB0;
             yB0 = 0;
@@ -491,7 +493,6 @@ public abstract class AbstractImageDataReader {
         } else {
             CoverageTracker.mark(12);
         }
-
         int w = xR1 - xR0;
         int h = yR1 - yR0;
         if (w <= 0 || h <= 0) {
@@ -503,7 +504,6 @@ public abstract class AbstractImageDataReader {
             return;
         }
         CoverageTracker.mark(14);
-
         // see if the xR1, yR1 would extend past the limits of the block
         if (w > blockWidth) {
             w = blockWidth;
@@ -517,7 +517,6 @@ public abstract class AbstractImageDataReader {
         } else {
             CoverageTracker.mark(18);
         }
-
         // The TiffRasterData class expects data to be in the order
         // corresponding to TiffPlanarConfiguration.PLANAR. So for the
         // multivariable case, we must convert CHUNKY data to PLANAR.
