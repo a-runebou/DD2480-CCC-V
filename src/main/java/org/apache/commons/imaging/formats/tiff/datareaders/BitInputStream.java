@@ -63,13 +63,15 @@ final class BitInputStream extends FilterInputStream {
             branches[i] = true;
         }
         public static void reportCoverage() {
+            System.out.println("---- Branch Coverage Report for BitInputStream.readBits ----");
             int total = 0;
-            for (boolean b: branches) {
+            for (int i = 0; i < branches.length; i++) {
+                boolean b = branches[i];
+                System.out.println("branch " + (i + 1) + ": " + (b ? "covered" : "not covered"));
                 if (b) {
                     total++;
                 }
             }
-            System.out.println("---- Branch Coverage Report for BitInputStream.readBits ----");
             System.out.println("Covered branches: " + total + " out of " + branches.length);
             System.out.printf("Coverage: %.2f%%%n",  total / (float) branches.length * 100);
             System.out.println("---------------------------------------------");
