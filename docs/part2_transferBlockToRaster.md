@@ -28,3 +28,5 @@ Since the analysed function does not contain ternary operators or exception-base
 The main limitation of the tool is that it requires manual instrumentation, which can be error-prone and may not capture all branches if the programmer forgets to mark them. Additionally, it does not provide any insights into the execution paths taken or the frequency of branch execution.
 
 ### If you have an automated tool, are your results consistent with the ones produced by existing tool(s)?
+
+I compared my results with JaCoCo, which marks the exact same branches. However, JaCoCo also provides additional information such more details on which branches has not been covered (in cases where `||` or `&&` operators are used for example). JaCoCo also provides line coverage and method coverage, which are not captured by my tool. Overall, while the results are consistent in terms of branch coverage, JaCoCo offers a more comprehensive analysis of code coverage.
