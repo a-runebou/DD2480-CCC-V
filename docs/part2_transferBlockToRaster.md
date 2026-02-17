@@ -25,5 +25,6 @@ Since the analysed function does not contain ternary operators or exception-base
 
 ### What are the limitations of your tool? How would the instrumentation change if you modify the program?
 
+The main limitation of the tool is that it requires manual instrumentation, which can be error-prone and may not capture all branches if the programmer forgets to mark them. Additionally, it does not provide any insights into the execution paths taken or the frequency of branch execution.
 
 ### If you have an automated tool, are your results consistent with the ones produced by existing tool(s)?
