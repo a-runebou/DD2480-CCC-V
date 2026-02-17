@@ -16,7 +16,38 @@
 -->
 
 # Part 2 - Task 1 - function `readBits`
+## The final coverage:
+- branch 1: covered
+- branch 2: covered
+- branch 3: covered
+- branch 4: covered
+- branch 5: covered
+- branch 6: not covered
+- branch 7: covered
+- branch 8: covered
+- branch 9: not covered
+- branch 10: not covered
+- branch 11: not covered
+- branch 12: not covered
+- branch 13: not covered
+- branch 14: not covered
+- branch 15: not covered
+- branch 16: not covered
+- branch 17: covered
+- branch 18: not covered
+- branch 19: not covered
+- branch 20: not covered
+- branch 21: not covered
+- branch 22: not covered
+- branch 23: not covered
+- branch 24: not covered
+- branch 25: not covered
+- branch 26: not covered
+- branch 27: not covered
+- branch 28: not covered
 
+Covered branches: 8 out of 28
+Coverage: 28.57%
 ### What is the quality of your own coverage measurement? Does it take into account ternary operators (condition ? yes : no) and exceptions, if available in your language?
 As the coverage measurement is done by manual instrumentation (adding check markers into the source code), the quality is deffinitely not acceptable for a full scale project, but for this task, it is sufficient, as it provides the same results.
 
