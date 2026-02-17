@@ -19,6 +19,9 @@
 
 ### What is the quality of your own coverage measurement? Does it take into account ternary operators (condition ? yes : no) and exceptions, if available in your language?
 
+The coverage measurement I implemented provides basic manual branch coverage by explicitly marking branches in the code. It does not automatically detect all branches, so it relies on the programmer to identify and mark them correctly. This means that if I miss marking a branch, it will not be accounted for in the coverage report.
+
+Since the analysed function does not contain ternary operators or exception-based control flow, these constructs are not directly relevant in this specific case. However, the current approach does not automatically detect such constructs; they would require manual instrumentation to ensure coverage tracking.
 
 ### What are the limitations of your tool? How would the instrumentation change if you modify the program?
 
