@@ -17,6 +17,30 @@
 
 ## Summary for function `transferBlockToRaster`
 
+### Output
+Branch 0: covered
+Branch 1: covered
+Branch 2: covered
+Branch 3: covered
+Branch 4: covered
+Branch 5: covered
+Branch 6: covered
+Branch 7: covered
+Branch 8: covered
+Branch 9: not covered
+Branch 10: covered
+Branch 11: not covered
+Branch 12: covered
+Branch 13: not covered
+Branch 14: covered
+Branch 15: not covered
+Branch 16: covered
+Branch 17: not covered
+Branch 18: covered
+Branch 19: covered
+Branch 20: covered
+Branch 21: covered
+
 ### What is the quality of your own coverage measurement? Does it take into account ternary operators (condition ? yes : no) and exceptions, if available in your language?
 
 The coverage measurement I implemented provides basic manual branch coverage by explicitly marking branches in the code. It does not automatically detect all branches, so it relies on the programmer to identify and mark them correctly. This means that if I miss marking a branch, it will not be accounted for in the coverage report.
