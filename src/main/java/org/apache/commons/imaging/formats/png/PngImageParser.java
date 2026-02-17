@@ -419,38 +419,98 @@ public class PngImageParser extends AbstractImageParser<PngImagingParameters> im
     }
 
 
-    public static final class ManualBranchCoverage {
+   public static final class ManualBranchCoverage {
     private static final Map<String, AtomicInteger> hits = new ConcurrentHashMap<>();
+    private static volatile boolean hookInstalled = false;
+
+    private static final String[] IDS = {
+        "GII_01_TRUE_chunksEmpty",
+        "GII_01_FALSE_chunksNotEmpty",
+        "GII_02_TRUE_badIHDRCount",
+        "GII_02_FALSE_oneIHDR",
+        "GII_03_TRUE_hasTRNS",
+        "GII_03_FALSE_noTRNS",
+        "GII_04_TRUE_multiPHYS_throw",
+        "GII_04_FALSE_notMultiPHYS",
+        "GII_05_TRUE_onePHYS_set",
+        "GII_05_FALSE_zeroPHYS",
+        "GII_06_TRUE_multiSCAL_throw",
+        "GII_06_FALSE_notMultiSCAL",
+        "GII_07_TRUE_oneSCAL_set",
+        "GII_07_FALSE_zeroSCAL",
+        "GII_08_TRUE_sCAL_unitMeters",
+        "GII_08_FALSE_sCAL_unitRadians",
+        "GII_09_TRUE_pHYs_unitMeters",
+        "GII_09_FALSE_pHYs_notMetersOrNull",
+        "GII_10_TRUE_hasPLTE",
+        "GII_10_FALSE_noPLTE",
+        "GII_SW_GRAY",
+        "GII_SW_RGB",
+        "GII_SW_DEFAULT"
+    };
 
     private ManualBranchCoverage() {}
 
+    private static void installShutdownHookOnce() {
+        if (hookInstalled) return;
+        synchronized (ManualBranchCoverage.class) {
+            if (hookInstalled) return;
+            hookInstalled = true;
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                System.err.println(report());
+                System.err.flush();
+            }));
+        }
+    }
+
+    public static void registerAll() {
+        installShutdownHookOnce();
+        for (String id : IDS) {
+            hits.putIfAbsent(id, new AtomicInteger(0));
+        }
+    }
+
     public static void hit(String id) {
-        hits.computeIfAbsent(id, k -> new AtomicInteger()).incrementAndGet();
+        installShutdownHookOnce();
+        hits.computeIfAbsent(id, k -> new AtomicInteger(0)).incrementAndGet();
     }
 
     public static String report() {
         StringBuilder sb = new StringBuilder();
-        sb.append("\n MANUAL BRANCH COVERAGE REPORT \n");
-        hits.keySet().stream().sorted().forEach(k ->
-            sb.append(k).append(" -> ").append(hits.get(k).get()).append("\n")
-        );
-        sb.append(" END REPORT \n");
+        sb.append("\n=== MANUAL BRANCH COVERAGE REPORT ===\n");
+        for (String id : IDS) {
+            AtomicInteger count = hits.get(id);
+            sb.append(id).append(" -> ").append(count != null ? count.get() : 0).append("\n");
+        }
+        sb.append("=== END REPORT ===\n");
         return sb.toString();
     }
+
+    public static void reset() {
+        hits.clear();
     }
+}
+
 
     @Override
     public ImageInfo getImageInfo(final ByteSource byteSource, final PngImagingParameters params) throws ImagingException, IOException {
+        ManualBranchCoverage.registerAll();
         final List<PngChunk> chunks = readChunks(byteSource, new ChunkType[] { ChunkType.IHDR, ChunkType.pHYs, ChunkType.sCAL, ChunkType.tEXt, ChunkType.zTXt,
                 ChunkType.tRNS, ChunkType.PLTE, ChunkType.iTXt, }, false);
 
         if (chunks.isEmpty()) {
+            ManualBranchCoverage.hit("GII_01_TRUE_chunksEmpty");
             throw new ImagingException("PNG: no chunks");
+        } else {
+            ManualBranchCoverage.hit("GII_01_FALSE_chunksNotEmpty");
         }
 
         final List<PngChunk> IHDRs = filterChunks(chunks, ChunkType.IHDR);
         if (IHDRs.size() != 1) {
+            ManualBranchCoverage.hit("GII_02_TRUE_badIHDRCount");
             throw new ImagingException("PNG contains more than one Header");
+        } else {
+            ManualBranchCoverage.hit("GII_02_FALSE_oneIHDR");
         }
 
         final PngChunkIhdr pngChunkIHDR = (PngChunkIhdr) IHDRs.get(0);
@@ -459,8 +519,10 @@ public class PngImageParser extends AbstractImageParser<PngImagingParameters> im
 
         final List<PngChunk> tRNSs = filterChunks(chunks, ChunkType.tRNS);
         if (!tRNSs.isEmpty()) {
+            ManualBranchCoverage.hit("GII_03_TRUE_hasTRNS");
             transparent = true;
         } else {
+            ManualBranchCoverage.hit("GII_03_FALSE_noTRNS");
             // CE - Fix Alpha.
             transparent = pngChunkIHDR.getPngColorType().hasAlpha();
             // END FIX
@@ -470,25 +532,39 @@ public class PngImageParser extends AbstractImageParser<PngImagingParameters> im
 
         final List<PngChunk> pHYss = filterChunks(chunks, ChunkType.pHYs);
         if (pHYss.size() > 1) {
+            ManualBranchCoverage.hit("GII_04_TRUE_multiPHYS_throw");
             throw new ImagingException("PNG contains more than one pHYs: " + pHYss.size());
+        } else {
+            ManualBranchCoverage.hit("GII_04_FALSE_notMultiPHYS");
         }
         if (pHYss.size() == 1) {
+            ManualBranchCoverage.hit("GII_05_TRUE_onePHYS_set");
             pngChunkpHYs = (PngChunkPhys) pHYss.get(0);
+        } else {
+            ManualBranchCoverage.hit("GII_05_FALSE_zeroPHYS");
         }
 
         PhysicalScale physicalScale = PhysicalScale.UNDEFINED;
 
         final List<PngChunk> sCALs = filterChunks(chunks, ChunkType.sCAL);
         if (sCALs.size() > 1) {
+            ManualBranchCoverage.hit("GII_06_TRUE_multiSCAL_throw");
             throw new ImagingException("PNG contains more than one sCAL:" + sCALs.size());
+        } else {
+            ManualBranchCoverage.hit("GII_06_FALSE_notMultiSCAL");
         }
         if (sCALs.size() == 1) {
+            ManualBranchCoverage.hit("GII_07_TRUE_oneSCAL_set");
             final PngChunkScal pngChunkScal = (PngChunkScal) sCALs.get(0);
             if (pngChunkScal.getUnitSpecifier() == 1) {
+                ManualBranchCoverage.hit("GII_08_TRUE_sCAL_unitMeters");
                 physicalScale = PhysicalScale.createFromMeters(pngChunkScal.getUnitsPerPixelXAxis(), pngChunkScal.getUnitsPerPixelYAxis());
             } else {
+                ManualBranchCoverage.hit("GII_08_FALSE_sCAL_unitRadians");
                 physicalScale = PhysicalScale.createFromRadians(pngChunkScal.getUnitsPerPixelXAxis(), pngChunkScal.getUnitsPerPixelYAxis());
             }
+        } else {
+            ManualBranchCoverage.hit("GII_07_FALSE_zeroSCAL");
         }
 
         final List<PngChunk> tEXts = filterChunks(chunks, ChunkType.tEXt);
@@ -539,33 +615,42 @@ public class PngImageParser extends AbstractImageParser<PngImagingParameters> im
         // pngChunkpHYs.PixelsPerUnitXAxis );
         // }
         if (pngChunkpHYs != null && pngChunkpHYs.getUnitSpecifier() == 1) { // meters
+            ManualBranchCoverage.hit("GII_09_TRUE_pHYs_unitMeters");
             final double metersPerInch = 0.0254;
 
             physicalWidthDpi = (int) Math.round(pngChunkpHYs.getPixelsPerUnitXAxis() * metersPerInch);
             physicalWidthInch = (float) (width / (pngChunkpHYs.getPixelsPerUnitXAxis() * metersPerInch));
             physicalHeightDpi = (int) Math.round(pngChunkpHYs.getPixelsPerUnitYAxis() * metersPerInch);
             physicalHeightInch = (float) (height / (pngChunkpHYs.getPixelsPerUnitYAxis() * metersPerInch));
+        } else {
+            ManualBranchCoverage.hit("GII_09_FALSE_pHYs_notMetersOrNull");
         }
 
         boolean usesPalette = false;
 
         final List<PngChunk> PLTEs = filterChunks(chunks, ChunkType.PLTE);
         if (!PLTEs.isEmpty()) {
+            ManualBranchCoverage.hit("GII_10_TRUE_hasPLTE");
             usesPalette = true;
+        } else {
+            ManualBranchCoverage.hit("GII_10_FALSE_noPLTE");
         }
 
         final ImageInfo.ColorType colorType;
         switch (pngChunkIHDR.getPngColorType()) {
         case GREYSCALE:
         case GREYSCALE_WITH_ALPHA:
+            ManualBranchCoverage.hit("GII_SW_GRAY");
             colorType = ImageInfo.ColorType.GRAYSCALE;
             break;
         case TRUE_COLOR:
         case INDEXED_COLOR:
         case TRUE_COLOR_WITH_ALPHA:
+            ManualBranchCoverage.hit("GII_SW_RGB");
             colorType = ImageInfo.ColorType.RGB;
             break;
         default:
+            ManualBranchCoverage.hit("GII_SW_DEFAULT");
             throw new ImagingException("Png: Unknown ColorType: " + pngChunkIHDR.getPngColorType());
         }
 
