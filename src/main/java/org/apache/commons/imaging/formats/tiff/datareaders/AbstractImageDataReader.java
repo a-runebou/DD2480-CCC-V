@@ -162,6 +162,31 @@ public abstract class AbstractImageDataReader {
     /** The planar configuration of the image. */
     protected final TiffPlanarConfiguration planarConfiguration;
 
+
+    /**
+     * A simple class for tracking branch coverage in the code. This is not intended for 
+     * production use, but rather as a tool for part 2 of the assignment.
+     */
+    public static class CoverageTracker {
+        public static boolean[] branches = new boolean[22];
+
+        // Register a shutdown hook to report coverage when the JVM exits
+        static {
+            System.out.println("CoverageTracker loaded");
+            Runtime.getRuntime().addShutdownHook(new Thread(CoverageTracker::report));
+        }
+
+        public static void mark(int i) {
+            branches[i] = true;
+        }
+
+        public static void report() {
+            for (int i = 0; i < branches.length; i++) {
+                System.out.println("Branch " + i + ": " + (branches[i] ? "covered" : "not covered"));
+            }
+        }
+    }
+
     /**
      * Constructs a new image data reader.
      *
@@ -411,17 +436,35 @@ public abstract class AbstractImageDataReader {
         int yR0 = yBlock - yRaster; // the raster
         int xR1 = xR0 + blockWidth;
         int yR1 = yR0 + blockHeight;
+
+        CoverageTracker.mark(0);
+        
         if (xR0 < 0) {
             xR0 = 0;
+            CoverageTracker.mark(1);
+        } else {
+            CoverageTracker.mark(2);
         }
+        
         if (yR0 < 0) {
             yR0 = 0;
+            CoverageTracker.mark(3);
+        } else {
+            CoverageTracker.mark(4);
         }
+        
         if (xR1 > rasterWidth) {
             xR1 = rasterWidth;
+            CoverageTracker.mark(5);
+        } else {
+            CoverageTracker.mark(6);
         }
+        
         if (yR1 > rasterHeight) {
             yR1 = rasterHeight;
+            CoverageTracker.mark(7);
+        } else {
+            CoverageTracker.mark(8);
         }
 
         // Recall that the above logic may have adjusted xR0, xY0 so that
@@ -432,13 +475,21 @@ public abstract class AbstractImageDataReader {
         // we check for negatives and adjust xR0, yR0 upward as necessary
         int xB0 = xR0 + xRaster - xBlock;
         int yB0 = yR0 + yRaster - yBlock;
+        
         if (xB0 < 0) {
             xR0 -= xB0;
             xB0 = 0;
+            CoverageTracker.mark(9);
+        } else {
+            CoverageTracker.mark(10);
         }
+        
         if (yB0 < 0) {
             yR0 -= yB0;
             yB0 = 0;
+            CoverageTracker.mark(11);
+        } else {
+            CoverageTracker.mark(12);
         }
 
         int w = xR1 - xR0;
@@ -448,20 +499,30 @@ public abstract class AbstractImageDataReader {
             // bounds of the raster. There is nothing to do. Ideally,
             // this situation never arises, because it would mean that
             // the data was read from the file unnecessarily.
+            CoverageTracker.mark(13);
             return;
         }
+        CoverageTracker.mark(14);
+
         // see if the xR1, yR1 would extend past the limits of the block
         if (w > blockWidth) {
             w = blockWidth;
+            CoverageTracker.mark(15);
+        } else {
+            CoverageTracker.mark(16);
         }
         if (h > blockHeight) {
             h = blockHeight;
+            CoverageTracker.mark(17);
+        } else {
+            CoverageTracker.mark(18);
         }
 
         // The TiffRasterData class expects data to be in the order
         // corresponding to TiffPlanarConfiguration.PLANAR. So for the
         // multivariable case, we must convert CHUNKY data to PLANAR.
         if (samplesPerPixel == 1) {
+            CoverageTracker.mark(19);
             for (int i = 0; i < h; i++) {
                 final int yR = yR0 + i;
                 final int yB = yB0 + i;
@@ -472,6 +533,7 @@ public abstract class AbstractImageDataReader {
                 }
             }
         } else if (this.planarConfiguration == TiffPlanarConfiguration.CHUNKY) {
+            CoverageTracker.mark(20);
             // The source data is in the interleaved (Chunky) order,
             // but the TiffRasterData class expects non-interleaved order.
             // So we transcribe the elements as appropriate.
@@ -488,6 +550,7 @@ public abstract class AbstractImageDataReader {
                 }
             }
         } else {
+            CoverageTracker.mark(21);
             for (int iPlane = 0; iPlane < samplesPerPixel; iPlane++) {
                 final int rPlanarOffset = iPlane * rasterWidth * rasterHeight;
                 final int bPlanarOffset = iPlane * blockWidth * blockHeight;
@@ -502,7 +565,6 @@ public abstract class AbstractImageDataReader {
                 }
             }
         }
-
     }
 
     /**
