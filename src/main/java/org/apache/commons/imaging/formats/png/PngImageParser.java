@@ -30,6 +30,9 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.InflaterInputStream;
@@ -413,6 +416,27 @@ public class PngImageParser extends AbstractImageParser<PngImagingParameters> im
         final PngChunkIccp pngChunkiCCP = (PngChunkIccp) chunks.get(0);
 
         return pngChunkiCCP.getUncompressedProfile(); // TODO should this be a clone?
+    }
+
+
+    public static final class ManualBranchCoverage {
+    private static final Map<String, AtomicInteger> hits = new ConcurrentHashMap<>();
+
+    private ManualBranchCoverage() {}
+
+    public static void hit(String id) {
+        hits.computeIfAbsent(id, k -> new AtomicInteger()).incrementAndGet();
+    }
+
+    public static String report() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n MANUAL BRANCH COVERAGE REPORT \n");
+        hits.keySet().stream().sorted().forEach(k ->
+            sb.append(k).append(" -> ").append(hits.get(k).get()).append("\n")
+        );
+        sb.append(" END REPORT \n");
+        return sb.toString();
+    }
     }
 
     @Override
