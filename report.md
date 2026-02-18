@@ -157,6 +157,17 @@ The project came with JaCoCo tool integrated within.
 We were already pretty familiar with this tool from our previous projects, so it was easy to use.
 The project README even came with a shell command to generate the JaCoCo coverage, so there were no problems.
 
+To generate the report we used the existing Maven workflow (as also described in the project documentation), e.g.:
+
+- `mvn clean test`
+- `mvn jacoco:report`
+
+The HTML report is produced under:
+- `target/site/jacoco/index.html`
+
+Overall, no additional configuration was required beyond running the documented commands.
+
+
 ### Your own coverage tool
 
 All of us implemented a similar manual branch coverage, which consisted of a static boolean array, and hit markers written into each branch.
