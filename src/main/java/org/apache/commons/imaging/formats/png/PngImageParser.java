@@ -212,6 +212,25 @@ public class PngImageParser extends AbstractImageParser<PngImagingParameters> im
         // END FIX
     }
 
+    /**
+     * Reads physical scale information from sCAL chunk if present.
+     *
+     * @param chunks the list of chunks to search
+     * @return the physical scale or UNDEFINED if no sCAL chunk
+     * @throws ImagingException if multiple sCAL chunks found
+     */
+    private static PhysicalScale readPhysicalScale(final List<PngChunk> chunks) throws ImagingException {
+        final PngChunkScal pngChunkScal = getSingleOptionalChunk(chunks, ChunkType.sCAL, "PNG contains more than one sCAL:");
+        if (pngChunkScal != null) {
+            if (pngChunkScal.getUnitSpecifier() == 1) {
+                return PhysicalScale.createFromMeters(pngChunkScal.getUnitsPerPixelXAxis(), pngChunkScal.getUnitsPerPixelYAxis());
+            } else {
+                return PhysicalScale.createFromRadians(pngChunkScal.getUnitsPerPixelXAxis(), pngChunkScal.getUnitsPerPixelYAxis());
+            }
+        }
+        return PhysicalScale.UNDEFINED;
+    }
+
     @Override
     protected String[] getAcceptedExtensions() {
         return ACCEPTED_EXTENSIONS.clone();
@@ -491,16 +510,7 @@ public class PngImageParser extends AbstractImageParser<PngImagingParameters> im
 
         final PngChunkPhys pngChunkpHYs = getSingleOptionalChunk(chunks, ChunkType.pHYs, "PNG contains more than one pHYs: ");
 
-        PhysicalScale physicalScale = PhysicalScale.UNDEFINED;
-
-        final PngChunkScal pngChunkScal = getSingleOptionalChunk(chunks, ChunkType.sCAL, "PNG contains more than one sCAL:");
-        if (pngChunkScal != null) {
-            if (pngChunkScal.getUnitSpecifier() == 1) {
-                physicalScale = PhysicalScale.createFromMeters(pngChunkScal.getUnitsPerPixelXAxis(), pngChunkScal.getUnitsPerPixelYAxis());
-            } else {
-                physicalScale = PhysicalScale.createFromRadians(pngChunkScal.getUnitsPerPixelXAxis(), pngChunkScal.getUnitsPerPixelYAxis());
-            }
-        }
+        final PhysicalScale physicalScale = readPhysicalScale(chunks);
 
         final List<PngChunk> tEXts = filterChunks(chunks, ChunkType.tEXt);
         final List<PngChunk> zTXts = filterChunks(chunks, ChunkType.zTXt);
