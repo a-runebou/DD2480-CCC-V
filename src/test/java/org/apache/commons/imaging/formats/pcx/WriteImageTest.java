@@ -111,11 +111,51 @@ class PcxWriterBitDepthTest {
         assertEquals(1, data[65] & 0xFF);
     }
 
+    @Test
+    void test1bit4planes() throws IOException {
+        // planesWanted != 1 -> hit 7
+        BufferedImage img = new BufferedImage(3, 3, BufferedImage.TYPE_INT_RGB);
+        int c = 1;
+        for (int y = 0; y < 3; y++) {
+            for (int x = 0; x < 3; x++) {
+                int rgb = ((c * 40) & 0xFF) << 16
+                        | ((c * 80) & 0xFF) << 8
+                        | ((c * 20) & 0xFF);
+                img.setRGB(x, y, rgb);
+                c++;
             }
         }
 
-        assertTrue(foundPaletteMarker);
+        PcxImagingParameters params = new PcxImagingParameters()
+                .setBitDepth(4)
+                .setPlanes(4);
+
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        new PcxWriter(params).writeImage(img, os);
+
+        byte[] data = os.toByteArray();
+        assertEquals(1, data[3] & 0xFF);
+        assertEquals(4, data[65] & 0xFF);
+    }
+
+    @Test
+    void testBitDepth2Planes2() throws IOException {
+        // palette.length() > 2
+        // planesWanted == 2 -> hit 10
+        BufferedImage img = new BufferedImage(3, 1, BufferedImage.TYPE_INT_RGB);
+        img.setRGB(0, 0, Color.BLACK.getRGB());
+        img.setRGB(1, 0, Color.RED.getRGB());
+        img.setRGB(2, 0, Color.WHITE.getRGB());
+
+        PcxImagingParameters params = new PcxImagingParameters()
+                .setBitDepth(2)
+                .setPlanes(2);
+
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        new PcxWriter(params).writeImage(img, os);
+
+        byte[] data = os.toByteArray();
+        assertEquals(1, data[3] & 0xFF);
+        assertEquals(2, data[65] & 0xFF);
     }
 }
-
-
