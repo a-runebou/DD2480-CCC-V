@@ -54,23 +54,34 @@ final class BitInputStream extends FilterInputStream {
         return in.read();
     }
 
+    /**
+     * Returns the next count bits as an integer, where count is between 1 and 8, 16, 24 or 32.
+     * 
+     * Returns the next count bits as an integer, where count is between 1 and 8, 16, 24 or 32. 
+     * When reading more than 8 bits (2,3 or bytes), the order of the bytes is specified in the variable byteOrder as Little or Big Endian.
+     * Reading across bytes is not supported and will result in an exception.
+     * 
+     * @param count number of bits to read
+     * @return the next count bits as an integer
+     * @throws IOException 
+     */
     public int readBits(final int count) throws IOException {
-        if (count < 8) {
-            if (cacheBitsRemaining == 0) {
+        if (count < 8) { // read incomplete byte
+            if (cacheBitsRemaining == 0) { // no bits in cache
                 // fill cache
                 cache = in.read();
                 cacheBitsRemaining = 8;
                 bytesRead++;
             }
-            if (count > cacheBitsRemaining) {
+            if (count > cacheBitsRemaining) { // reading across byte boundary not supported
                 throw new ImagingException("BitInputStream: can't read bit fields across bytes");
             }
 
             // int bits_to_shift = cache_bits_remaining - count;
-            cacheBitsRemaining -= count;
-            final int bits = cache >> cacheBitsRemaining;
+            cacheBitsRemaining -= count; // calculate remaining bits in cache after read
+            final int bits = cache >> cacheBitsRemaining; // shift the desired bits to the rightmost position
 
-            switch (count) {
+            switch (count) { // mask out the desired bits
             case 1:
                 return bits & 1;
             case 2:
@@ -88,11 +99,11 @@ final class BitInputStream extends FilterInputStream {
             }
 
         }
-        if (cacheBitsRemaining > 0) {
+        if (cacheBitsRemaining > 0) { // if there are still bits in the cache, then we can't read a full byte or more without losing those bits, so throw an error
             throw new ImagingException("BitInputStream: incomplete bit read");
         }
 
-        if (count == 8) {
+        if (count == 8) { // read a full byte
             bytesRead++;
             return in.read();
         }
@@ -102,10 +113,10 @@ final class BitInputStream extends FilterInputStream {
          * of the files will be of Little Endian.
          */
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            switch (count) {
+            switch (count) { 
             case 16:
                 bytesRead += 2;
-                return in.read() << 8 | in.read() << 0;
+                return in.read() << 8 | in.read() << 0; // shift the big endian bytes to the correct position and merge them
             case 24:
                 bytesRead += 3;
                 return in.read() << 16 | in.read() << 8 | in.read() << 0;
@@ -119,7 +130,7 @@ final class BitInputStream extends FilterInputStream {
             switch (count) {
             case 16:
                 bytesRead += 2;
-                return in.read() << 0 | in.read() << 8;
+                return in.read() << 0 | in.read() << 8; // now shift the little endian bytes to the correct position and merge them
             case 24:
                 bytesRead += 3;
                 return in.read() << 0 | in.read() << 8 | in.read() << 16;
