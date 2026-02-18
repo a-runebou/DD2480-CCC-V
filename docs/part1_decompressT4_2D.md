@@ -49,7 +49,7 @@ Carried out refactoring (optional, P+):
 
 [Refactoring](https://github.com/a-runebou/DD2480-CCC-V/commit/efbb358b6d168ad418ae7e2f4aded6750a4f8a60)
 
-![Improved CC](DD2480-CCC-V/assets/Refactor.png)
+![Improved CC](../assets/Refactor.png)
 
 ### Your own coverage tool
 
@@ -78,9 +78,9 @@ It is consitent with which branches are reached, however jacoco counts many more
 
 Show the comments that describe the requirements for the coverage.
 
-Report of old coverage: ![Old coverage](DD2480-CCC-V/assets/default.png)
+Report of old coverage: ![Old coverage](../assets/default.png)
 
-Report of new coverage: ![New coverage](DD2480-CCC-V/assets/ImprovedBranchCoverage.png)
+Report of new coverage: ![New coverage](../assets/ImprovedBranchCoverage.png)
 
 Test cases added:
 
