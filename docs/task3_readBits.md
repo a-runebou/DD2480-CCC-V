@@ -1,3 +1,20 @@
+<!---
+ Licensed to the Apache Software Foundation (ASF) under one or more
+ contributor license agreements.  See the NOTICE file distributed with
+ this work for additional information regarding copyright ownership.
+ The ASF licenses this file to You under the Apache License, Version 2.0
+ (the "License"); you may not use this file except in compliance with
+ the License.  You may obtain a copy of the License at
+
+      https://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
 ## Refactoring plan
 - The original complexity (according to lizard): 20
 - Expected change in complexity: 
@@ -58,3 +75,16 @@ if (byteOrder == ByteOrder.BIG_ENDIAN) {
     }
 }
 ```
+Furthermore, the function can be rewritten in order to get rid of the switch statement. 
+If we introduce another variable in which to store the result, we can read any number of bytes as 
+```
+int result = 0
+for (int i = 0; i < numberOfBytes; i++>) {
+    result = (result << 8) | in.read();
+}
+```
+for the Big Endian, and `result = result | (in.read << (8*i))` for Little Endian.
+This will further reduce the complexity of the second function.
+
+## Final complexity
+The complexity of readBits was reduced down to 7 from the original 20. Our expectation was correct, only we added one check in the form of an IF statement for valid values which was not present in the original implementation.
