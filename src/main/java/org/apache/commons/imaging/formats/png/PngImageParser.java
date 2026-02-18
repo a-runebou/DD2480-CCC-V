@@ -143,7 +143,7 @@ public class PngImageParser extends AbstractImageParser<PngImagingParameters> im
         return true;
     }
 
-    private List<PngChunk> filterChunks(final List<PngChunk> chunks, final ChunkType type) {
+    private static List<PngChunk> filterChunks(final List<PngChunk> chunks, final ChunkType type) {
         final List<PngChunk> result = new ArrayList<>();
 
         for (final PngChunk chunk : chunks) {
@@ -153,6 +153,46 @@ public class PngImageParser extends AbstractImageParser<PngImagingParameters> im
         }
 
         return result;
+    }
+
+    /**
+     * Gets a required single chunk of the specified type.
+     *
+     * @param <T> the chunk type
+     * @param chunks the list of chunks to search
+     * @param type the chunk type to find
+     * @param badCountError the error message if count != 1
+     * @return the single chunk
+     * @throws ImagingException if zero or multiple chunks found
+     */
+    @SuppressWarnings("unchecked")
+    private static <T extends PngChunk> T getRequiredSingleChunk(final List<PngChunk> chunks, final ChunkType type, final String badCountError)
+            throws ImagingException {
+        final List<PngChunk> filtered = filterChunks(chunks, type);
+        if (filtered.size() != 1) {
+            throw new ImagingException(badCountError);
+        }
+        return (T) filtered.get(0);
+    }
+
+    /**
+     * Gets an optional single chunk of the specified type.
+     *
+     * @param <T> the chunk type
+     * @param chunks the list of chunks to search
+     * @param type the chunk type to find
+     * @param multiError the error message prefix if multiple chunks found
+     * @return the single chunk or null if not found
+     * @throws ImagingException if multiple chunks found
+     */
+    @SuppressWarnings("unchecked")
+    private static <T extends PngChunk> T getSingleOptionalChunk(final List<PngChunk> chunks, final ChunkType type, final String multiError)
+            throws ImagingException {
+        final List<PngChunk> filtered = filterChunks(chunks, type);
+        if (filtered.size() > 1) {
+            throw new ImagingException(multiError + filtered.size());
+        }
+        return filtered.isEmpty() ? null : (T) filtered.get(0);
     }
 
     @Override
@@ -428,12 +468,7 @@ public class PngImageParser extends AbstractImageParser<PngImagingParameters> im
             throw new ImagingException("PNG: no chunks");
         }
 
-        final List<PngChunk> IHDRs = filterChunks(chunks, ChunkType.IHDR);
-        if (IHDRs.size() != 1) {
-            throw new ImagingException("PNG contains more than one Header");
-        }
-
-        final PngChunkIhdr pngChunkIHDR = (PngChunkIhdr) IHDRs.get(0);
+        final PngChunkIhdr pngChunkIHDR = getRequiredSingleChunk(chunks, ChunkType.IHDR, "PNG contains more than one Header");
 
         boolean transparent = false;
 
@@ -446,24 +481,12 @@ public class PngImageParser extends AbstractImageParser<PngImagingParameters> im
             // END FIX
         }
 
-        PngChunkPhys pngChunkpHYs = null;
-
-        final List<PngChunk> pHYss = filterChunks(chunks, ChunkType.pHYs);
-        if (pHYss.size() > 1) {
-            throw new ImagingException("PNG contains more than one pHYs: " + pHYss.size());
-        }
-        if (pHYss.size() == 1) {
-            pngChunkpHYs = (PngChunkPhys) pHYss.get(0);
-        }
+        final PngChunkPhys pngChunkpHYs = getSingleOptionalChunk(chunks, ChunkType.pHYs, "PNG contains more than one pHYs: ");
 
         PhysicalScale physicalScale = PhysicalScale.UNDEFINED;
 
-        final List<PngChunk> sCALs = filterChunks(chunks, ChunkType.sCAL);
-        if (sCALs.size() > 1) {
-            throw new ImagingException("PNG contains more than one sCAL:" + sCALs.size());
-        }
-        if (sCALs.size() == 1) {
-            final PngChunkScal pngChunkScal = (PngChunkScal) sCALs.get(0);
+        final PngChunkScal pngChunkScal = getSingleOptionalChunk(chunks, ChunkType.sCAL, "PNG contains more than one sCAL:");
+        if (pngChunkScal != null) {
             if (pngChunkScal.getUnitSpecifier() == 1) {
                 physicalScale = PhysicalScale.createFromMeters(pngChunkScal.getUnitsPerPixelXAxis(), pngChunkScal.getUnitsPerPixelYAxis());
             } else {
