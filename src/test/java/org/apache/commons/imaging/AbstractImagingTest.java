@@ -24,9 +24,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
+import org.apache.commons.imaging.formats.tiff.itu_t4.T4AndT6Compression;
 import org.apache.commons.imaging.internal.Debug;
 import org.apache.commons.imaging.test.FileSystemTraversal;
+import org.junit.jupiter.api.AfterAll;
+
+
 
 public abstract class AbstractImagingTest {
 
@@ -113,4 +118,16 @@ public abstract class AbstractImagingTest {
     protected boolean isPhilHarveyTestImage(final File file) {
         return file.getAbsolutePath().startsWith(ImagingTestConstants.PHIL_HARVEY_TEST_IMAGE_FOLDER.getAbsolutePath());
     }
+        @AfterAll
+    public static void writeAccessedBranches() {
+        try {
+            final Set<String> accessedBranches = T4AndT6Compression.getAccessedBranches();
+            System.out.println(accessedBranches);
+        } catch (final Exception e) {
+            e.printStackTrace();
+        } finally {
+            T4AndT6Compression.clearAccessedBranches();
+        }
+    }
+
 }

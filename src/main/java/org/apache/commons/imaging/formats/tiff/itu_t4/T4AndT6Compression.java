@@ -18,6 +18,8 @@ package org.apache.commons.imaging.formats.tiff.itu_t4;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.commons.imaging.ImagingException;
 import org.apache.commons.imaging.common.Allocator;
@@ -443,6 +445,23 @@ public final class T4AndT6Compression {
         }
     }
 
+    private static Set<String> accessedBranches = new HashSet<>();
+
+    /**
+     * Returns the set of accessed branches during decompression.
+     * @return the set of accessed branch names
+     */
+    public static Set<String> getAccessedBranches() {
+        return accessedBranches;
+    }
+
+    /**
+     * Clears the set of accessed branches. Should be called before each test to ensure accurate tracking of branches for that test.
+     */
+    public static void clearAccessedBranches() {
+        accessedBranches.clear();
+    }
+
     /**
      * Decompressed T.4 2D encoded data. EOL at the beginning and after each row, can be preceded by fill bits to fit on a byte boundary, and is succeeded by a
      * tag bit determining whether the next line is encoded using 1D or 2D. No RTC.
@@ -454,6 +473,7 @@ public final class T4AndT6Compression {
      * @return the decompressed data
      * @throws ImagingException if it fails to read the compressed data
      */
+
     public static byte[] decompressT4_2D(final byte[] compressed, final int width, final int height, final boolean hasFill) throws ImagingException {
         final BitInputStreamFlexible inputStream = new BitInputStreamFlexible(new ByteArrayInputStream(compressed));
         try (BitArrayOutputStream outputStream = new BitArrayOutputStream()) {
@@ -462,11 +482,15 @@ public final class T4AndT6Compression {
                 int rowLength = 0;
                 try {
                     T4_T6_Tables.Entry entry = CONTROL_CODES.decode(inputStream);
-                    if (!isEol(entry, hasFill)) {
+                    if (!isEol(entry, hasFill)) { // Branch 1
+                        accessedBranches.add("Branch 1");
                         throw new ImagingException("Expected EOL not found");
+                    } else {
+                        accessedBranches.add("Branch 2");
                     }
                     final int tagBit = inputStream.readBits(1);
-                    if (tagBit == 0) {
+                    if (tagBit == 0) { // Branch 3
+                        accessedBranches.add("Branch 3");
                         // 2D
                         int codingA0Color = WHITE;
                         int referenceA0Color = WHITE;
@@ -476,10 +500,12 @@ public final class T4AndT6Compression {
                             final int a1;
                             final int a2;
                             entry = CONTROL_CODES.decode(inputStream);
-                            if (entry == T4_T6_Tables.P) {
+                            if (entry == T4_T6_Tables.P) { // Branch 5
+                                accessedBranches.add("Branch 5");
                                 fillRange(outputStream, referenceLine, a0, b2, codingA0Color);
                                 a0 = b2;
-                            } else if (entry == T4_T6_Tables.H) {
+                            } else if (entry == T4_T6_Tables.H) { // Branch 6
+                                accessedBranches.add("Branch 6");
                                 final int a0a1 = readTotalRunLength(inputStream, codingA0Color);
                                 a1 = a0 + a0a1;
                                 fillRange(outputStream, referenceLine, a0, a1, codingA0Color);
@@ -487,23 +513,32 @@ public final class T4AndT6Compression {
                                 a2 = a1 + a1a2;
                                 fillRange(outputStream, referenceLine, a1, a2, 1 - codingA0Color);
                                 a0 = a2;
-                            } else {
+                            } else { // Branch 7
+                                accessedBranches.add("Branch 7");
                                 final int a1b1;
-                                if (entry == T4_T6_Tables.V0) {
+                                if (entry == T4_T6_Tables.V0) { // Branch 8
+                                    accessedBranches.add("Branch 8");
                                     a1b1 = 0;
-                                } else if (entry == T4_T6_Tables.VL1) {
+                                } else if (entry == T4_T6_Tables.VL1) { // Branch 9
+                                    accessedBranches.add("Branch 9");
                                     a1b1 = -1;
-                                } else if (entry == T4_T6_Tables.VL2) {
+                                } else if (entry == T4_T6_Tables.VL2) { // Branch 10
+                                    accessedBranches.add("Branch 10");
                                     a1b1 = -2;
-                                } else if (entry == T4_T6_Tables.VL3) {
+                                } else if (entry == T4_T6_Tables.VL3) { // Branch 11
+                                    accessedBranches.add("Branch 11");
                                     a1b1 = -3;
-                                } else if (entry == T4_T6_Tables.VR1) {
+                                } else if (entry == T4_T6_Tables.VR1) { // Branch 12
+                                    accessedBranches.add("Branch 12");
                                     a1b1 = 1;
-                                } else if (entry == T4_T6_Tables.VR2) {
+                                } else if (entry == T4_T6_Tables.VR2) { // Branch 13
+                                    accessedBranches.add("Branch 13");
                                     a1b1 = 2;
-                                } else if (entry == T4_T6_Tables.VR3) {
+                                } else if (entry == T4_T6_Tables.VR3) { // Branch 14
+                                    accessedBranches.add("Branch 14");
                                     a1b1 = 3;
-                                } else {
+                                } else { // Branch 15
+                                    accessedBranches.add("Branch 15");
                                     throw new ImagingException("Invalid/unknown T.4 control code " + entry.bitString);
                                 }
                                 a1 = b1 + a1b1;
@@ -512,9 +547,11 @@ public final class T4AndT6Compression {
                                 codingA0Color = 1 - codingA0Color;
                             }
                             referenceA0Color = changingElementAt(referenceLine, a0);
-                            if (codingA0Color == referenceA0Color) {
+                            if (codingA0Color == referenceA0Color) { // Branch 16
+                                accessedBranches.add("Branch 16");
                                 b1 = nextChangingElement(referenceLine, referenceA0Color, a0 + 1);
-                            } else {
+                            } else { // Branch 17
+                                accessedBranches.add("Branch 17");
                                 b1 = nextChangingElement(referenceLine, referenceA0Color, a0 + 1);
                                 b1 = nextChangingElement(referenceLine, 1 - referenceA0Color, b1 + 1);
                             }
@@ -523,6 +560,8 @@ public final class T4AndT6Compression {
                         }
                     } else {
                         // 1D
+                        // Branch 4
+                        accessedBranches.add("Branch 4");
                         int color = WHITE;
                         for (rowLength = 0; rowLength < width;) {
                             final int runLength = readTotalRunLength(inputStream, color);
@@ -535,17 +574,27 @@ public final class T4AndT6Compression {
                         }
                     }
                 } catch (final IOException e) {
+                    // Branch 18
+                    accessedBranches.add("Branch 18");
                     throw new ImagingException("Decompression error", e);
                 }
 
-                if (rowLength == width) {
+                if (rowLength == width) { // Branch 19
+                    accessedBranches.add("Branch 19");
                     outputStream.flush();
-                } else if (rowLength > width) {
+                } else if (rowLength > width) { // Branch 20
+                    accessedBranches.add("Branch 20");
                     throw new ImagingException("Unrecoverable row length error in image row " + y);
+                } else { // Branch 21
+                    accessedBranches.add("Branch 21");
                 }
             }
 
             return outputStream.toByteArray();
+        } catch (final IOException e) {
+            // Branch 22
+            accessedBranches.add("Branch 22");
+            throw new ImagingException("IOException during decompression", e);
         }
     }
 
