@@ -419,77 +419,99 @@ public class PngImageParser extends AbstractImageParser<PngImagingParameters> im
     }
 
 
-   public static final class ManualBranchCoverage {
-    private static final Map<String, AtomicInteger> hits = new ConcurrentHashMap<>();
-    private static volatile boolean hookInstalled = false;
+    /**
+     * Manual branch coverage tracking for getImageInfo method.
+     * Tracks which branches are executed during testing.
+     */
+    public static final class ManualBranchCoverage {
+        private static final Map<String, AtomicInteger> hits = new ConcurrentHashMap<>();
+        private static volatile boolean hookInstalled;
 
-    private static final String[] IDS = {
-        "GII_01_TRUE_chunksEmpty",
-        "GII_01_FALSE_chunksNotEmpty",
-        "GII_02_TRUE_badIHDRCount",
-        "GII_02_FALSE_oneIHDR",
-        "GII_03_TRUE_hasTRNS",
-        "GII_03_FALSE_noTRNS",
-        "GII_04_TRUE_multiPHYS_throw",
-        "GII_04_FALSE_notMultiPHYS",
-        "GII_05_TRUE_onePHYS_set",
-        "GII_05_FALSE_zeroPHYS",
-        "GII_06_TRUE_multiSCAL_throw",
-        "GII_06_FALSE_notMultiSCAL",
-        "GII_07_TRUE_oneSCAL_set",
-        "GII_07_FALSE_zeroSCAL",
-        "GII_08_TRUE_sCAL_unitMeters",
-        "GII_08_FALSE_sCAL_unitRadians",
-        "GII_09_TRUE_pHYs_unitMeters",
-        "GII_09_FALSE_pHYs_notMetersOrNull",
-        "GII_10_TRUE_hasPLTE",
-        "GII_10_FALSE_noPLTE",
-        "GII_SW_GRAY",
-        "GII_SW_RGB",
-        "GII_SW_DEFAULT"
-    };
+        private static final String[] IDS = {
+            "GII_01_TRUE_chunksEmpty",
+            "GII_01_FALSE_chunksNotEmpty",
+            "GII_02_TRUE_badIHDRCount",
+            "GII_02_FALSE_oneIHDR",
+            "GII_03_TRUE_hasTRNS",
+            "GII_03_FALSE_noTRNS",
+            "GII_04_TRUE_multiPHYS_throw",
+            "GII_04_FALSE_notMultiPHYS",
+            "GII_05_TRUE_onePHYS_set",
+            "GII_05_FALSE_zeroPHYS",
+            "GII_06_TRUE_multiSCAL_throw",
+            "GII_06_FALSE_notMultiSCAL",
+            "GII_07_TRUE_oneSCAL_set",
+            "GII_07_FALSE_zeroSCAL",
+            "GII_08_TRUE_sCAL_unitMeters",
+            "GII_08_FALSE_sCAL_unitRadians",
+            "GII_09_TRUE_pHYs_unitMeters",
+            "GII_09_FALSE_pHYs_notMetersOrNull",
+            "GII_10_TRUE_hasPLTE",
+            "GII_10_FALSE_noPLTE",
+            "GII_SW_GRAY",
+            "GII_SW_RGB",
+            "GII_SW_DEFAULT"
+        };
 
-    private ManualBranchCoverage() {}
+        private ManualBranchCoverage() { }
 
-    private static void installShutdownHookOnce() {
-        if (hookInstalled) return;
-        synchronized (ManualBranchCoverage.class) {
-            if (hookInstalled) return;
-            hookInstalled = true;
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                System.err.println(report());
-                System.err.flush();
-            }));
+        private static void installShutdownHookOnce() {
+            if (hookInstalled) {
+                return;
+            }
+            synchronized (ManualBranchCoverage.class) {
+                if (hookInstalled) {
+                    return;
+                }
+                hookInstalled = true;
+                Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                    System.err.println(report());
+                    System.err.flush();
+                }));
+            }
+        }
+
+        /**
+         * Registers all branch IDs with initial count of 0.
+         */
+        public static void registerAll() {
+            installShutdownHookOnce();
+            for (final String id : IDS) {
+                hits.putIfAbsent(id, new AtomicInteger(0));
+            }
+        }
+
+        /**
+         * Records a hit for the specified branch ID.
+         * @param id the branch identifier
+         */
+        public static void hit(final String id) {
+            installShutdownHookOnce();
+            hits.computeIfAbsent(id, k -> new AtomicInteger(0)).incrementAndGet();
+        }
+
+        /**
+         * Generates a coverage report showing hit counts for all branches.
+         * @return the formatted coverage report
+         */
+        public static String report() {
+            final StringBuilder sb = new StringBuilder();
+            sb.append("\n=== MANUAL BRANCH COVERAGE REPORT ===\n");
+            for (final String id : IDS) {
+                final AtomicInteger count = hits.get(id);
+                sb.append(id).append(" -> ").append(count != null ? count.get() : 0).append("\n");
+            }
+            sb.append("=== END REPORT ===\n");
+            return sb.toString();
+        }
+
+        /**
+         * Resets all branch hit counts.
+         */
+        public static void reset() {
+            hits.clear();
         }
     }
-
-    public static void registerAll() {
-        installShutdownHookOnce();
-        for (String id : IDS) {
-            hits.putIfAbsent(id, new AtomicInteger(0));
-        }
-    }
-
-    public static void hit(String id) {
-        installShutdownHookOnce();
-        hits.computeIfAbsent(id, k -> new AtomicInteger(0)).incrementAndGet();
-    }
-
-    public static String report() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("\n=== MANUAL BRANCH COVERAGE REPORT ===\n");
-        for (String id : IDS) {
-            AtomicInteger count = hits.get(id);
-            sb.append(id).append(" -> ").append(count != null ? count.get() : 0).append("\n");
-        }
-        sb.append("=== END REPORT ===\n");
-        return sb.toString();
-    }
-
-    public static void reset() {
-        hits.clear();
-    }
-}
 
 
     @Override
