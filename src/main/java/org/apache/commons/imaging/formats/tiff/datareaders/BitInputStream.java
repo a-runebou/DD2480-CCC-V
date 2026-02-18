@@ -73,6 +73,7 @@ final class BitInputStream extends FilterInputStream {
                 cacheBitsRemaining = 8;
                 bytesRead++;
             }
+            // TODO: test reading across byte boundary 
             if (count > cacheBitsRemaining) { // reading across byte boundary not supported
                 throw new ImagingException("BitInputStream: can't read bit fields across bytes");
             }
@@ -84,21 +85,22 @@ final class BitInputStream extends FilterInputStream {
             switch (count) { // mask out the desired bits
             case 1:
                 return bits & 1;
-            case 2:
+            case 2: // TODO: test reading 2 bits
                 return bits & 3;
-            case 3:
+            case 3: // TODO: test reading 3 bits
                 return bits & 7;
-            case 4:
+            case 4: // TODO: test reading 4 bits
                 return bits & 15;
-            case 5:
+            case 5: // TODO: test reading 5 bits
                 return bits & 31;
-            case 6:
+            case 6: // TODO: test reading 6 bits
                 return bits & 63;
-            case 7:
+            case 7: // TODO: test reading 7 bits
                 return bits & 127;
             }
 
         }
+        // TODO: test reading bytes when bits are still in cache
         if (cacheBitsRemaining > 0) { // if there are still bits in the cache, then we can't read a full byte or more without losing those bits, so throw an error
             throw new ImagingException("BitInputStream: incomplete bit read");
         }
@@ -112,7 +114,7 @@ final class BitInputStream extends FilterInputStream {
          * Taking default order of the TIFF to be Little Endian and reversing the bytes in the end if its Big Endian.This is done because majority (may be all)
          * of the files will be of Little Endian.
          */
-        if (byteOrder == ByteOrder.BIG_ENDIAN) {
+        if (byteOrder == ByteOrder.BIG_ENDIAN) { // TODO: test reading 2,3,4 bytes for both little and big endian
             switch (count) { 
             case 16:
                 bytesRead += 2;
@@ -141,7 +143,7 @@ final class BitInputStream extends FilterInputStream {
                 break;
             }
         }
-
+        // TODO: test unknown error --> specifying different count than 1..8, 16, 24, 32
         throw new ImagingException("BitInputStream: unknown error");
     }
 }
