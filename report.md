@@ -153,12 +153,19 @@ Therefore the different outcomes are not very clear, and had to be deduced from 
 
 ### Tools
 
-Document your experience in using a "new"/different coverage tool.
-
-How well was the tool documented? Was it possible/easy/difficult to
-integrate it with your build environment?
+The project came with JaCoCo tool integrated within.
+We were already pretty familiar with this tool from our previous projects, so it was easy to use.
+The project README even came with a shell command to generate the JaCoCo coverage, so there were no problems.
 
 ### Your own coverage tool
+
+All of us implemented a similar manual branch coverage, which consisted of a static boolean array, and hit markers written into each branch.
+
+**Function 1:**
+
+Related issue [add issue]()
+
+Patch: `git diff ...`
 
 Show a patch (or link to a branch) that shows the instrumented code to
 gather coverage measurements.
@@ -175,9 +182,20 @@ its output?
 
 1. How detailed is your coverage measurement?
 
+   Our tool is limited only for the most basic functionality, as it requires for the branch marker to be added inside the source code (call marker function with the ID of each branch). 
+   It can work with exceptions, as we can add the marker function inside `catch`. 
+   However, it can't work with ternary operators, as the function cannot be called. 
+   Ternary operators would need to rewritten using an `if` statement.
+
 2. What are the limitations of your own tool?
 
+   Our branch coverage by manual instrumentation is very limited, as it requires changing the source code directly. 
+   The individual branch markers need to be added manually, which often requires adding `else` to lone `if` statements.
+   Furthermore, it requires to know the total number of branches when creating the boolean array.
+
 3. Are the results of your tool consistent with existing coverage tools?
+
+   Yes, the results are consistent with the JaCoCo coverage. 
 
 ## Coverage improvement
 
