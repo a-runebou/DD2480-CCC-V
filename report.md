@@ -92,13 +92,33 @@ Related issue: [issues/7](https://github.com/a-runebou/DD2480-CCC-V/issues/7)
 
 ## Refactoring
 
-Plan for refactoring complex code:
+### 1. `PngImageParser#getImageInfo`
+   - **Author:** Apeel Subedi
+   - **ISSUE:** [#Issue 26](https://github.com/a-runebou/DD2480-CCC-V/issues/26)
+   
 
-Estimated impact of refactoring (lower CC, but other drawbacks?).
+   #### Refactoring Plan:
+   - Extracted helper methods to isolate responsibilities:
+      - `getRequiredSingleChunk`, `getSingleOptionalChunk`, `isTransparent`, `readPhysicalScale`, `collectTextChunks`, `computePhysicalInfo`
+   - Replaced an inline chunk-type array with a named constant: `IMAGE_INFO_CHUNKS`
+   >Note: The Refactoring was carried out to be considered for P+
 
-Carried out refactoring (optional, P+):
+   #### Impact:
+- **Cyclomatic complexity (CCN):** reduced from **20 to 8**
+- **Maintainability:** improved readability and reduced nested branching
+- **Coverage:** existing tests still pass; coverage improvement is documented in the Coverage Improvement section
+#### Drawbacks:
+- Slight increase in number of small helper methods,
+  but each method is easier to test and reason about.
 
-git diff ...
+#### Re-production:
+- Branch: `issue/26`
+- Diff command:
+  ```bash
+  git diff origin/master..issue/26 -- \
+    src/main/java/org/apache/commons/imaging/formats/png/PngImageParser.java
+   ```
+
 
 ## Coverage
 
