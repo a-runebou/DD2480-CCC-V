@@ -285,14 +285,14 @@ To visualize the code changes: `git diff master issue/18`
 
 ### Function 2: `PngImageParser#getImageInfo`
 Related issue: [#Issue 19](https://github.com/a-runebou/DD2480-CCC-V/issues/19)
-### Evidence (before/after)
+#### Evidence (before/after)
 - Old coverage evidence: [Before](https://github.com/a-runebou/DD2480-CCC-V/issues/19#issuecomment-3923767448)
 - New coverage evidence: [After](https://github.com/a-runebou/DD2480-CCC-V/issues/19#issuecomment-3923764755)
 
-### Improvement:
+#### Improvement:
 From the JaCoCo reports, branch coverage for `getImageInfo` improved from **83% to 96%** (instruction coverage **89% to 97%**), mainly by adding tests that trigger previously untested error/edge branches.
 
-### Tests added 
+#### Tests added 
 Added targeted tests to include missing branches in `getImageInfo`, such as:
 - `testChunksEmpty()` 
 - `testbadIHDRCount()` 
@@ -306,9 +306,34 @@ To visualize the code changes:
     src/main/java/org/apache/commons/imaging/formats/png/PngImageParser.java
    ```
 
+### Function 3: `unpackIntSamples`
+
+Related issue: [issue/16](https://github.com/a-runebou/DD2480-CCC-V/issues/16)
+
+Before adding tests, several branches in `unpackIntSamples` were not covered. In particular:
+- Big-endian and little-endian decoding branches.
+- 16-bit vs 32-bit decoding paths.
+- Predictor-based differencing logic.
+- The ternary branch calculating length.
+- Edge behaviour for unsupported bitsPerSample.
+
+The following tests were introduced to improve branch coverage:
+- `unpackIntSamples_16bit_littleEndian`: Verifies decoding logic for 16-bit samples in little-endian order.
+- `unpackIntSamples_16bit_bigEndian`: Ensures correct interpretation of byte order for 16-bit samples.
+- `unpackIntSamples_32bit_littleEndian`: Tests decoding of 32-bit samples stored in little-endian format.
+- `unpackIntSamples_32bit_bigEndian`: Validates big-endian decoding for 32-bit samples.
+- `unpackIntSamples_withDifferencing`: Covers predictor-based horizontal differencing reconstruction.
+- `unpackIntSamples_invalidBitsPerSample_branch`: Exercises branch behaviour when unsupported bit depth is provided.
+- `unpackIntSamples_lengthTernary_trueBranch`: Covers the conditional path where input byte length is insufficient, triggering exception behaviour.
+
+The old coverage reported by JaCoCo:
+![Before](/assets/coverage/unpackIntSample/f2_before.png)
+
+The new coverage reported by JaCoCo:
+![After](/assets/coverage/unpackIntSample/f2_after.png)
 
 
-
+### Function 4: ...
 
 Show the comments that describe the requirements for the coverage.
 
