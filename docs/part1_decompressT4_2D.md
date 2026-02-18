@@ -31,14 +31,56 @@ The function `decompressT4_2D` is responsible for decoding T.4 compressed data. 
 
 ### If your programming language uses exceptions: Are they taken into account by the tool? If you think of an exception as another possible branch (to the catch block or the end of the function), how is the CC affected?
 
-No, the tool does not take exceptions into account in its calculation of CC. This is discussed in the first question where we calculated the theoretical CCN considering the exit points from exceptions. If we consider exceptions as branches, then the CCN is no longer `21` but `15`. However, we do count `catch` blocks as decision points in our manual calculation.
+No, the tool does not take exceptions into account in its calculation of CC.
 
 ### Is the documentation of the function clear about the different possible outcomes induced by different branches taken?
 The documentation of the function is not very clear about the different possible outcomes induced by different branches. There is the Javadoc comment does not specify the what type of variable the return value is, however it does mention the exception. 
 
-Link for manual instrument: https://github.com/a-runebou/DD2480-CCC-V/commit/1c994dba9230adb857e080ab5c5f6967587259b9
-Link for added unit tests: https://github.com/a-runebou/DD2480-CCC-V/commit/cad443df6da8e34ebc328ff8644aba0c8de2a725
-Link for refactored function: https://github.com/a-runebou/DD2480-CCC-V/commit/efbb358b6d168ad418ae7e2f4aded6750a4f8a60
 
+## Refactoring
 
+Plan for refactoring complex code:
+One main contributer to the complexity of the code is a chain of else if. The plan is to refactor it into its own function.
+
+Estimated impact of refactoring (lower CC, but other drawbacks?).
+This will lower the CC of the function however the same amount of unit tests will be required for branch coverage. I would not necessarily say that this refactoring makes the code any more legibile. The only plus is that the CC is lower, though I would not claim it is an improvement on the code.
+
+Carried out refactoring (optional, P+):
+
+[Refactoring](https://github.com/a-runebou/DD2480-CCC-V/commit/efbb358b6d168ad418ae7e2f4aded6750a4f8a60)
+
+### Your own coverage tool
+
+[Own implementation](https://github.com/a-runebou/DD2480-CCC-V/commit/1c994dba9230adb857e080ab5c5f6967587259b9)
+
+What kinds of constructs does your tool support, and how accurate is
+its output?
+
+### Evaluation
+
+1. How detailed is your coverage measurement?
+
+It IDs each branch and stores the branch ID global if it was reached during unit tests.
+An else statement was added for each if missing one aswell as a catch for each try missing one
+
+2. What are the limitations of your own tool?
+
+The limitations are that it does not explicitly say what blocks of code were not reached, rather only the ID of the block.
+Furthermore it does not neatly present the results of coverage at the end of the run, but is spread out during the run.
+
+3. Are the results of your tool consistent with existing coverage tools?
+
+It is consitent with which branches are reached, however jacoco counts many more branches than the self implemented coverage measurement. I believe it is due to jacoco double counting branches in the case of elif statements.
+
+## Coverage improvement
+
+Show the comments that describe the requirements for the coverage.
+
+Report of old coverage: ![Old coverage](assets/default.png)
+
+Report of new coverage: ![New coverage](assets/ImprovedBranchCoverage.png)
+
+Test cases added:
+
+[Added Unit tests](https://github.com/a-runebou/DD2480-CCC-V/commit/cad443df6da8e34ebc328ff8644aba0c8de2a725)
 
