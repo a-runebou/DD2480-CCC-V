@@ -195,6 +195,23 @@ public class PngImageParser extends AbstractImageParser<PngImagingParameters> im
         return filtered.isEmpty() ? null : (T) filtered.get(0);
     }
 
+    /**
+     * Determines if the PNG has transparency based on tRNS chunk or alpha channel.
+     *
+     * @param chunks the list of chunks to search
+     * @param ihdr the IHDR chunk containing color type info
+     * @return true if the PNG has transparency
+     */
+    private static boolean isTransparent(final List<PngChunk> chunks, final PngChunkIhdr ihdr) {
+        final List<PngChunk> tRNSs = filterChunks(chunks, ChunkType.tRNS);
+        if (!tRNSs.isEmpty()) {
+            return true;
+        }
+        // CE - Fix Alpha.
+        return ihdr.getPngColorType().hasAlpha();
+        // END FIX
+    }
+
     @Override
     protected String[] getAcceptedExtensions() {
         return ACCEPTED_EXTENSIONS.clone();
@@ -470,16 +487,7 @@ public class PngImageParser extends AbstractImageParser<PngImagingParameters> im
 
         final PngChunkIhdr pngChunkIHDR = getRequiredSingleChunk(chunks, ChunkType.IHDR, "PNG contains more than one Header");
 
-        boolean transparent = false;
-
-        final List<PngChunk> tRNSs = filterChunks(chunks, ChunkType.tRNS);
-        if (!tRNSs.isEmpty()) {
-            transparent = true;
-        } else {
-            // CE - Fix Alpha.
-            transparent = pngChunkIHDR.getPngColorType().hasAlpha();
-            // END FIX
-        }
+        final boolean transparent = isTransparent(chunks, pngChunkIHDR);
 
         final PngChunkPhys pngChunkpHYs = getSingleOptionalChunk(chunks, ChunkType.pHYs, "PNG contains more than one pHYs: ");
 
