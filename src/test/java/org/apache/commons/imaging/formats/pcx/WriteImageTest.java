@@ -53,10 +53,9 @@ class PcxWriterBitDepthTest {
 
             byte[] data = os.toByteArray();
 
-            int headerBitDepth = data[3] & 0xFF;   // bits per pixel
+            int headerBitDepth = data[3];   // bits per pixel
 
             assertEquals(32, headerBitDepth);
-            
         }
 
         // CASE 2: bitDepthWanted = 24 (should become 8 bit, 3 planes)
@@ -71,7 +70,7 @@ class PcxWriterBitDepthTest {
 
             byte[] data = os.toByteArray();
 
-            int headerBitDepth = data[3] & 0xFF;
+            int headerBitDepth = data[3];
 
             assertEquals(8, headerBitDepth);
         }
@@ -88,9 +87,39 @@ class PcxWriterBitDepthTest {
 
             byte[] data = os.toByteArray();
 
-            int headerBitDepth = data[3] & 0xFF;
+            int headerBitDepth = data[3];
 
             assertEquals(8, headerBitDepth);
         }
     }
+
+    @Test
+    void testWriteImage_Writes256ColorPaletteBlock() throws IOException {
+
+        BufferedImage image = createSimpleRgbImage();
+
+        PcxImagingParameters params = new PcxImagingParameters()
+                .setBitDepth(8);
+
+        PcxWriter writer = new PcxWriter(params);
+
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        writer.writeImage(image, os);
+
+        byte[] data = os.toByteArray();
+
+        // Look for the 256-color palette marker byte (12)
+        boolean foundPaletteMarker = false;
+
+        for (int i = 0; i < data.length; i++) {
+            if ((data[i] & 0xFF) == 12) {
+                foundPaletteMarker = true;
+                break;
+            }
+        }
+
+        assertTrue(foundPaletteMarker);
+    }
 }
+
+
