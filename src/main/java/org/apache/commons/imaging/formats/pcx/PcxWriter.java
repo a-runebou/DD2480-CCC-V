@@ -75,6 +75,21 @@ final class PcxWriter {
             // ignore on purpose
         }
     }
+
+    static {
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (!reported) {
+                    reported = true;
+                    writeReportToFile();
+                }
+            }
+        }));
+    }
+
+    // ORIGINAL CODE 
+
     private final int encoding;
     private final int bitDepthWanted;
     private final int planesWanted;
