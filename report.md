@@ -170,6 +170,47 @@ Therefore the different outcomes are not very clear, and had to be deduced from 
   git diff master issue/24 src/main/java/org/apache/commons/imaging/formats/tiff/datareaders/BitInputStream.java
    ```
 
+
+### 3. `AbstractImageDataReader::unpackIntSamples`
+   - **Author:** Alexander Runebou
+   - **ISSUE:** [#Issue 16](https://github.com/a-runebou/DD2480-CCC-V/issues/16)
+
+**Summary**
+After analyzing the `unpackIntSamples` function, it is clear that the cyclomatic complexity is only partially necessary. The function combines multiple responsibilities, including byte decoding, endianness handling, bit-depth selection, row iteration, and post-processing. While each step is logically required, the function can be split into smaller, more focused functions to improve readability and maintainability.
+
+**Causes of complexity**
+- Conditional branches for different `bitsPerSample` values (16-bit and 32-bit).
+- Nested conditionals for byte order (big-endian vs. little-endian).
+- Loop logic that includes both decoding and post-processing steps.
+- Calculation of offsets and indexing togeteher with decoding.
+
+**Refactoring plan**
+1. Extract decoding logic per bit depth into separate functions:
+   - `decode16BitSamples(...)`
+   - `decode32BitSamples(...)`
+2. Create a helper function to handle endianness:
+    - `readInt16LittleEndian(...)`
+    - `readInt16BigEndian(...)`
+    - `readInt32LittleEndian(...)`
+    - `readInt32BigEndian(...)`
+3. Extract predictor processing:
+    - `applyDifferencing(...)`
+4. Simplify main loop
+
+**Estimated impact**
+The refactored code will have a lower cyclomatic complexity, as the function will be broken down into smaller, more focused functions. This will improve readability and maintainability, as each function will have a single responsibility. However, it may introduce some overhead due to additional function calls, but this is generally acceptable for improved code quality.
+
+**Impact**
+- The refactoring reduced the cyclomatic complexity from **13 to 4**.
+- The code is now more modular, with clear separation of concerns between decoding logic, endianness handling, and predictor processing.
+
+**Reproduction:**
+- Branch: `issue/16`
+- Diff command:
+  ```bash
+  git diff master issue/16 src/main/java/org/apache/commons/imaging/formats/tiff/datareaders/AbstractImageDataReader.java
+   ```
+
 ## Coverage
 
 ### Tools
