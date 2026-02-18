@@ -148,6 +148,27 @@ Therefore the different outcomes are not very clear, and had to be deduced from 
     src/main/java/org/apache/commons/imaging/formats/png/PngImageParser.java
    ```
 
+### 2. `BitInputStream::readBits`
+   - **Author:** Josef Kahoun
+   - **ISSUE:** [#Issue 24](https://github.com/a-runebou/DD2480-CCC-V/issues/24)
+   
+
+   #### Refactoring Plan:
+   - The switch for individual bits `case 1:
+    return bits & 1;` can be rewritten as `retyrn bits & (1<<count)-1`.
+   - Isolate the last part which reads whole bytes into a self-contained method.
+     - Rewrite the switch with a `for` cycle, which will read a single byte in each cycle and apply left shift accordingly.
+
+   #### Impact:
+- **Cyclomatic complexity (CCN):** reduced from **20 to 6**
+- **Maintainability:** Improved readability, increased generalization of the function, added protection against negative number of bits.
+
+#### Re-production:
+- Branch: `issue/24`
+- Diff command:
+  ```bash
+  git diff master issue/24 src/main/java/org/apache/commons/imaging/formats/tiff/datareaders/BitInputStream.java
+   ```
 
 ## Coverage
 
