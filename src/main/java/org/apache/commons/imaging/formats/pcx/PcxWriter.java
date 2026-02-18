@@ -16,6 +16,8 @@
 package org.apache.commons.imaging.formats.pcx;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
@@ -43,6 +45,36 @@ final class PcxWriter {
         }
     }
 
+    private static void writeReportToFile() {
+        try {
+            final File dir = new File("target");
+
+            final File outFile = new File(dir, "pcx-writeimage-coverage.txt");
+            try (FileWriter writer = new FileWriter(outFile)) {
+
+                int covered = 0;
+
+                for (int i = 0; i <= highestId; i++) {
+                    if (hits[i]) {
+                        covered++;
+                    }
+                }
+
+                final double percentage = (100.0 * covered) / highestId;
+
+                writer.write("=== DIY Coverage Report (writeImage) ===\n");
+                writer.write("Branches covered: " + covered + "\n");
+                writer.write("Total branches:   " + (highestId + 1) + "\n");
+                writer.write(String.format("Coverage: %.2f%%\n\n", percentage));
+
+                for (int i = 0; i <= highestId; i++) {
+                    writer.write("Branch " + i + " = " + (hits[i] ? "HIT" : "MISS") + "\n");
+                }
+            }
+        } catch (final IOException ignored) {
+            // ignore on purpose
+        }
+    }
     private final int encoding;
     private final int bitDepthWanted;
     private final int planesWanted;
