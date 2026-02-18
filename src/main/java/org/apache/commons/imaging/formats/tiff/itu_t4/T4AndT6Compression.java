@@ -516,31 +516,7 @@ public final class T4AndT6Compression {
                             } else { // Branch 7
                                 accessedBranches.add("Branch 7");
                                 final int a1b1;
-                                if (entry == T4_T6_Tables.V0) { // Branch 8
-                                    accessedBranches.add("Branch 8");
-                                    a1b1 = 0;
-                                } else if (entry == T4_T6_Tables.VL1) { // Branch 9
-                                    accessedBranches.add("Branch 9");
-                                    a1b1 = -1;
-                                } else if (entry == T4_T6_Tables.VL2) { // Branch 10
-                                    accessedBranches.add("Branch 10");
-                                    a1b1 = -2;
-                                } else if (entry == T4_T6_Tables.VL3) { // Branch 11
-                                    accessedBranches.add("Branch 11");
-                                    a1b1 = -3;
-                                } else if (entry == T4_T6_Tables.VR1) { // Branch 12
-                                    accessedBranches.add("Branch 12");
-                                    a1b1 = 1;
-                                } else if (entry == T4_T6_Tables.VR2) { // Branch 13
-                                    accessedBranches.add("Branch 13");
-                                    a1b1 = 2;
-                                } else if (entry == T4_T6_Tables.VR3) { // Branch 14
-                                    accessedBranches.add("Branch 14");
-                                    a1b1 = 3;
-                                } else { // Branch 15
-                                    accessedBranches.add("Branch 15");
-                                    throw new ImagingException("Invalid/unknown T.4 control code " + entry.bitString);
-                                }
+                                a1b1 = checkEntry(entry);
                                 a1 = b1 + a1b1;
                                 fillRange(outputStream, referenceLine, a0, a1, codingA0Color);
                                 a0 = a1;
@@ -592,6 +568,36 @@ public final class T4AndT6Compression {
 
             return outputStream.toByteArray();
         }
+    }
+
+    private static int checkEntry(T4_T6_Tables.Entry entry) throws ImagingException {
+        final int a1b1;
+        if (entry == T4_T6_Tables.V0) { // Branch 8
+            accessedBranches.add("Branch 8");
+            a1b1 = 0;
+        } else if (entry == T4_T6_Tables.VL1) { // Branch 9
+            accessedBranches.add("Branch 9");
+            a1b1 = -1;
+        } else if (entry == T4_T6_Tables.VL2) { // Branch 10
+            accessedBranches.add("Branch 10");
+            a1b1 = -2;
+        } else if (entry == T4_T6_Tables.VL3) { // Branch 11
+            accessedBranches.add("Branch 11");
+            a1b1 = -3;
+        } else if (entry == T4_T6_Tables.VR1) { // Branch 12
+            accessedBranches.add("Branch 12");
+            a1b1 = 1;
+        } else if (entry == T4_T6_Tables.VR2) { // Branch 13
+            accessedBranches.add("Branch 13");
+            a1b1 = 2;
+        } else if (entry == T4_T6_Tables.VR3) { // Branch 14
+            accessedBranches.add("Branch 14");
+            a1b1 = 3;
+        } else { // Branch 15
+            accessedBranches.add("Branch 15");
+            throw new ImagingException("Invalid/unknown T.4 control code " + entry.bitString);
+        }
+        return a1b1;
     }
 
     /**
