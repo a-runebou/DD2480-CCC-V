@@ -24,11 +24,11 @@ has to be delivered in a standard, cross-platform format.
 
 ## Project
 
-Name:
+Name: **commons-imaging**
 
-URL:
+URL: [https://github.com/apache/commons-imaging](https://github.com/apache/commons-imaging)
 
-One or two sentences describing it
+Description: Apache Commons Imaging is an open-source Java library that provides functionality for reading, writing, and analysing different image formats and their metadata. The project focuses on format-aware image parsing and processing (for example TIFF, JPEG, and PNG) and is part of the Apache Commons ecosystem.
 
 ## Onboarding experience
 
