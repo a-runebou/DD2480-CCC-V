@@ -212,7 +212,23 @@ git diff master issue/12 src/main/java/org/apache/commons/imaging/formats/tiff/d
    Yes, the results are consistent with the JaCoCo coverage. 
 
 ## Coverage improvement
+### Function 1: `readBits`
+Related issue: [issue/18](https://github.com/a-runebou/DD2480-CCC-V/issues/18)
 
+The class `BitInputStream.java` (located in `formats/tiff/datareaders`) did not have any dedicated unit tests, therefore expanding on existing tests was impossible.
+New tests were written in a dedicated test file.
+The function is public, so it could be called directly, and no additional interfaces were needed to be implemented. 
+The only data structure needed was the input stream, which was fairly easy to create.
+
+In total, **6 tests** were created and the coverage was improved from **8/28 to 27/28**. 
+
+The old coverage reported by JaCoCo:
+![Old Coverage](/assets/coverage/readBits/read_bits_old_coverage.png)
+The new coverage reported by JaCoCo:
+![New Coverage](/assets/coverage/readBits/read_bits_new_coverage.png)
+
+To visualize the code changes: `git diff master issue/18`
+### 
 Show the comments that describe the requirements for the coverage.
 
 Report of old coverage: [link]
