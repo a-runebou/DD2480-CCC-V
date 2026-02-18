@@ -780,30 +780,46 @@ public abstract class AbstractImageDataReader {
         }
     }
 
+    private int readInt16LittleEndian(final byte[] bytes, final int offset) {
+        return bytes[offset + 1] << 8 | bytes[offset] & 0xff;
+    }
+
+    private int readInt16BigEndian(final byte[] bytes, final int offset) {
+        return bytes[offset] << 8 | bytes[offset + 1] & 0xff;
+    }
+
     private void decode16BitRow(final int width, final int index, int offset,
             final byte[] bytes, final ByteOrder byteOrder, final int[] samples) {
         if (byteOrder == ByteOrder.LITTLE_ENDIAN) {
             for (int j = 0; j < width; j++, offset += 2) {
-                samples[index + j] = bytes[offset + 1] << 8 | bytes[offset] & 0xff;
+                samples[index + j] = readInt16LittleEndian(bytes, offset);
             }
         } else {
             for (int j = 0; j < width; j++, offset += 2) {
-                samples[index + j] = bytes[offset] << 8 | bytes[offset + 1] & 0xff;
+                samples[index + j] = readInt16BigEndian(bytes, offset);
             }
         }
+    }
+
+    private int readInt32LittleEndian(final byte[] bytes, final int offset) {
+        return bytes[offset + 3] << 24 | (bytes[offset + 2] & 0xff) << 16 | (bytes[offset + 1] & 0xff) << 8
+                | bytes[offset] & 0xff;
+    }
+
+    private int readInt32BigEndian(final byte[] bytes, final int offset) {
+        return bytes[offset] << 24 | (bytes[offset + 1] & 0xff) << 16 | (bytes[offset + 2] & 0xff) << 8
+                | bytes[offset + 3] & 0xff;
     }
 
     private void decode32BitRow(final int width, final int index, int offset,
             final byte[] bytes, final ByteOrder byteOrder, final int[] samples) {
         if (byteOrder == ByteOrder.LITTLE_ENDIAN) {
             for (int j = 0; j < width; j++, offset += 4) {
-                samples[index + j] = bytes[offset + 3] << 24 | (bytes[offset + 2] & 0xff) << 16 | (bytes[offset + 1] & 0xff) << 8
-                        | bytes[offset] & 0xff;
+                samples[index + j] = readInt32LittleEndian(bytes, offset);
             }
         } else {
             for (int j = 0; j < width; j++, offset += 4) {
-                samples[index + j] = bytes[offset] << 24 | (bytes[offset + 1] & 0xff) << 16 | (bytes[offset + 2] & 0xff) << 8
-                        | bytes[offset + 3] & 0xff;
+                samples[index + j] = readInt32BigEndian(bytes, offset);
             }
         }
     }
