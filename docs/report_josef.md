@@ -43,3 +43,8 @@ However, the `catch` keyword is counted as an additional decision.
 The function `performNextMedianCut` lacks any sort of documentation, either in the form of Javadoc or normal comments.
 Therefore the different outcomes are not very clear, and had to be deduced from the source code.
 
+# Part 2 - Coverage measurement and improvement
+## Task 1 - DIY: manual branch coverage for `readBits`
+Linked issue: [issue/12](https://github.com/a-runebou/DD2480-CCC-V/issues/12)
+
+To visualize the code instrumentation: `git diff master issue/12`
