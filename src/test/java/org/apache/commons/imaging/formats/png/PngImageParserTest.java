@@ -17,6 +17,7 @@
 
 package org.apache.commons.imaging.formats.png;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -26,10 +27,32 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import org.apache.commons.imaging.ImageInfo;
+import org.apache.commons.imaging.ImagingException;
 import org.apache.commons.imaging.common.AllocationRequestException;
 import org.junit.jupiter.api.Test;
 
 class PngImageParserTest extends AbstractPngTest {
+
+    /**
+     * Test GII_01_TRUE_chunksEmpty: getImageInfo throws exception when no relevant chunks are found.
+     * This creates a PNG with valid signature but only an IEND chunk (no IHDR or other expected chunks).
+     */
+    @Test
+    void testGetImageInfo_chunksEmpty_throwsException() {
+        // PNG signature followed immediately by IEND chunk
+        final byte[] pngWithNoChunks = {
+                // PNG Signature 8 bytes
+                (byte) 0x89, 'P', 'N', 'G', '\r', '\n', 0x1A, '\n',
+                // IEND chunk: length=0, type=IEND, CRC
+                0x00, 0x00, 0x00, 0x00,
+                'I', 'E', 'N', 'D',
+                (byte) 0xAE, 0x42, 0x60, (byte) 0x82
+        };
+
+        final ImagingException exception = assertThrows(ImagingException.class,
+                () -> new PngImageParser().getImageInfo(pngWithNoChunks, null));
+        assertEquals("PNG: no chunks", exception.getMessage());
+    }
 
     private static byte[] getPngImageBytes(final BufferedImage image, final PngImagingParameters params) throws IOException {
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
