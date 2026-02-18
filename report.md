@@ -49,6 +49,8 @@ The project builds and runs as expected using `mvn`. However, we had some strugg
 
 ### Function 1: `readBitmapIconData` (Fabian Williams & Alexander Runebou)
 
+Related issue: [issues/5](https://github.com/a-runebou/DD2480-CCC-V/issues/5)
+
 **What are your results? Did everyone get the same result? Is there something that is unclear? If you have a tool, is its result the same as yours?**
 > Both of us got the same result, which is a CCN of `21`. We counted the exact same lines and operations which solidifies our result. However, this result simply counts the number of decision points in the code +1. This matches the result from the tool `lizard`, but it does not consider early returns which can reduce the CC. 
 
