@@ -17,6 +17,7 @@
 
 # Part 1: Complexity measurement
 ## Summary for function `performNextMedianCut`
+Linked issue: [issue/4](https://github.com/a-runebou/DD2480-CCC-V/issues/4)
 
 ### What are your results? Did everyone get the same result? Is there something that is unclear? If you have a tool, is its result the same as yours?
 
