@@ -35,15 +35,12 @@ class PngImageParserTest extends AbstractPngTest {
 
     /**
      * Test GII_01_TRUE_chunksEmpty: getImageInfo throws exception when no relevant chunks are found.
-     * This creates a PNG with valid signature but only an IEND chunk (no IHDR or other expected chunks).
+     * Creates a PNG with valid signature but only an IEND chunk (no IHDR or other expected chunks).
      */
     @Test
     void testChunksEmpty() {
-        // PNG signature followed immediately by IEND chunk
         final byte[] pngWithNoChunks = {
-                // PNG Signature 8 bytes
                 (byte) 0x89, 'P', 'N', 'G', '\r', '\n', 0x1A, '\n',
-                // IEND chunk: length=0, type=IEND, CRC
                 0x00, 0x00, 0x00, 0x00,
                 'I', 'E', 'N', 'D',
                 (byte) 0xAE, 0x42, 0x60, (byte) 0x82
@@ -56,36 +53,22 @@ class PngImageParserTest extends AbstractPngTest {
 
     /**
      * Test GII_02_TRUE_badIHDRCount: getImageInfo throws exception when IHDR count != 1.
-     * This creates a PNG with two IHDR chunks to trigger the "more than one Header" exception.
+     * Creates a PNG with two IHDR chunks to trigger the "more than one Header" exception.
      */
     @Test
     void testbadIHDRCount() {
-        // PNG with two IHDR chunks
         final byte[] pngWithTwoIHDR = {
                 (byte) 0x89, 'P', 'N', 'G', '\r', '\n', 0x1A, '\n',
-                // First IHDR chunk (length=13, type=IHDR, data, CRC)
-                0x00, 0x00, 0x00, 0x0D,  
-                'I', 'H', 'D', 'R',       
-                0x00, 0x00, 0x00, 0x01,   // Width: 1
-                0x00, 0x00, 0x00, 0x01,   // Height: 1
-                0x08,                      // Bit depth: 8
-                0x02,                      // Color type: 2 (RGB)
-                0x00,                      // Compression: 0
-                0x00,                      // Filter: 0
-                0x00,                      // Interlace: 0
-                (byte) 0x90, 0x77, 0x53, (byte) 0xDE,  
-                // Second IHDR chunk 
-                0x00, 0x00, 0x00, 0x0D,  
-                'I', 'H', 'D', 'R',       
-                0x00, 0x00, 0x00, 0x01,   // Width: 1
-                0x00, 0x00, 0x00, 0x01,   // Height: 1
-                0x08,                      // Bit depth: 8
-                0x02,                      // Color type: 2 (RGB)
-                0x00,                      // Compression: 0
-                0x00,                      // Filter: 0
-                0x00,                      // Interlace: 0
-                (byte) 0x90, 0x77, 0x53, (byte) 0xDE, 
-                // IEND chunk
+                0x00, 0x00, 0x00, 0x0D,
+                'I', 'H', 'D', 'R',
+                0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+                0x08, 0x02, 0x00, 0x00, 0x00,
+                (byte) 0x90, 0x77, 0x53, (byte) 0xDE,
+                0x00, 0x00, 0x00, 0x0D,
+                'I', 'H', 'D', 'R',
+                0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+                0x08, 0x02, 0x00, 0x00, 0x00,
+                (byte) 0x90, 0x77, 0x53, (byte) 0xDE,
                 0x00, 0x00, 0x00, 0x00,
                 'I', 'E', 'N', 'D',
                 (byte) 0xAE, 0x42, 0x60, (byte) 0x82
@@ -94,6 +77,37 @@ class PngImageParserTest extends AbstractPngTest {
         final ImagingException exception = assertThrows(ImagingException.class,
                 () -> new PngImageParser().getImageInfo(pngWithTwoIHDR, null));
         assertEquals("PNG contains more than one Header", exception.getMessage());
+    }
+
+    /**
+     * Test GII_04_TRUE_multiPHYS_throw: getImageInfo throws exception when more than one pHYs chunk exists.
+     * Creates a PNG with two pHYs chunks to trigger the exception.
+     */
+    @Test
+    void testMultiPHYS() {
+        final byte[] pngWithTwoPHYs = {
+                (byte) 0x89, 'P', 'N', 'G', '\r', '\n', 0x1A, '\n',
+                0x00, 0x00, 0x00, 0x0D,
+                'I', 'H', 'D', 'R',
+                0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+                0x08, 0x02, 0x00, 0x00, 0x00,
+                (byte) 0x90, 0x77, 0x53, (byte) 0xDE,
+                0x00, 0x00, 0x00, 0x09,
+                'p', 'H', 'Y', 's',
+                0x00, 0x00, 0x0E, (byte) 0xC3, 0x00, 0x00, 0x0E, (byte) 0xC3, 0x01,
+                (byte) 0xC7, 0x6F, (byte) 0xA8, 0x64,
+                0x00, 0x00, 0x00, 0x09,
+                'p', 'H', 'Y', 's',
+                0x00, 0x00, 0x0E, (byte) 0xC3, 0x00, 0x00, 0x0E, (byte) 0xC3, 0x01,
+                (byte) 0xC7, 0x6F, (byte) 0xA8, 0x64,
+                0x00, 0x00, 0x00, 0x00,
+                'I', 'E', 'N', 'D',
+                (byte) 0xAE, 0x42, 0x60, (byte) 0x82
+        };
+
+        final ImagingException exception = assertThrows(ImagingException.class,
+                () -> new PngImageParser().getImageInfo(pngWithTwoPHYs, null));
+        assertEquals("PNG contains more than one pHYs: 2", exception.getMessage());
     }
 
     private static byte[] getPngImageBytes(final BufferedImage image, final PngImagingParameters params) throws IOException {
