@@ -774,20 +774,56 @@ public abstract class AbstractImageDataReader {
         return samples;
     }
 
+    /**
+     * Applies differencing to the specified row of samples. This method is used when the predictor value
+     * is 2, indicating that the samples are stored as differences from the previous sample.
+     *
+     * @param samples the array of samples to be processed.
+     * @param index the starting index of the row in the samples array.
+     * @param width the width of the row.
+     */
     private void applyDifferencing(final int[] samples, final int index, final int width) {
         for (int j = 1; j < width; j++) {
             samples[index + j] += samples[index + j - 1];
         }
     }
 
+    /**
+     * Reads a 16-bit integer from the byte array in little-endian order, starting at the specified offset.
+     * The method combines two bytes from the array into a single 16-bit integer, with the least significant
+     * byte at the lowest index.
+     *
+     * @param bytes the byte array containing the data.
+     * @param offset the starting index in the byte array from which to read the integer.
+     * @return the 16-bit integer value read from the byte array.
+     */
     private int readInt16LittleEndian(final byte[] bytes, final int offset) {
         return bytes[offset + 1] << 8 | bytes[offset] & 0xff;
     }
 
+    /**
+     * Reads a 16-bit integer from the byte array in big-endian order, starting at the specified offset.
+     * The method combines two bytes from the array into a single 16-bit integer, with the most significant
+     * byte at the lowest index.
+     *
+     * @param bytes the byte array containing the data.
+     * @param offset the starting index in the byte array from which to read the integer.
+     * @return the 16-bit integer value read from the byte array.
+     */
     private int readInt16BigEndian(final byte[] bytes, final int offset) {
         return bytes[offset] << 8 | bytes[offset + 1] & 0xff;
     }
 
+    /**
+     * Defines a method for decoding a 16 bit row of data from the raw byte array.
+     *
+     * @param width the width of the row to be decoded.
+     * @param index the index in the sample array where the row starts.
+     * @param offset the offset in the byte array where the row starts.
+     * @param bytes the raw byte array containing the sample data.
+     * @param byteOrder the byte order of the data, either LITTLE_ENDIAN or BIG_ENDIAN.
+     * @param samples the array where the decoded samples will be stored.
+     */
     private void decode16BitRow(final int width, final int index, int offset,
             final byte[] bytes, final ByteOrder byteOrder, final int[] samples) {
         if (byteOrder == ByteOrder.LITTLE_ENDIAN) {
@@ -801,16 +837,44 @@ public abstract class AbstractImageDataReader {
         }
     }
 
+    /**
+     * Reads a 32-bit integer from the byte array in little-endian order, starting at the specified offset.
+     * The method combines four bytes from the array into a single integer, with the least significant
+     * byte at the lowest index.
+     *
+     * @param bytes the byte array containing the data.
+     * @param offset the starting index in the byte array from which to read the integer.
+     * @return the 32-bit integer value read from the byte array.
+     */
     private int readInt32LittleEndian(final byte[] bytes, final int offset) {
         return bytes[offset + 3] << 24 | (bytes[offset + 2] & 0xff) << 16 | (bytes[offset + 1] & 0xff) << 8
                 | bytes[offset] & 0xff;
     }
 
+    /**
+     * Reads a 32-bit integer from the byte array in big-endian order, starting at the specified offset.
+     * The method combines four bytes from the array into a single integer, with the most significant
+     * byte at the lowest index.
+     *
+     * @param bytes the byte array containing the data.
+     * @param offset the starting index in the byte array from which to read the integer.
+     * @return the 32-bit integer value read from the byte array.
+     */
     private int readInt32BigEndian(final byte[] bytes, final int offset) {
         return bytes[offset] << 24 | (bytes[offset + 1] & 0xff) << 16 | (bytes[offset + 2] & 0xff) << 8
                 | bytes[offset + 3] & 0xff;
     }
 
+    /**
+     * Defines a method for decoding a 32 bit row of data from the raw byte array.
+     *
+     * @param width the width of the row to be decoded.
+     * @param index the index in the sample array where the row starts.
+     * @param offset the offset in the byte array where the row starts.
+     * @param bytes the raw byte array containing the sample data.
+     * @param byteOrder the byte order of the data, either LITTLE_ENDIAN or BIG_ENDIAN.
+     * @param samples the array where the decoded samples will be stored.
+     */
     private void decode32BitRow(final int width, final int index, int offset,
             final byte[] bytes, final ByteOrder byteOrder, final int[] samples) {
         if (byteOrder == ByteOrder.LITTLE_ENDIAN) {
@@ -824,15 +888,31 @@ public abstract class AbstractImageDataReader {
         }
     }
 
-    // Decoder
+    /**
+     * Defines a method for decoding a row of sample data from the raw byte array.
+     * The method takes the width of the row, the index in the sample array where the
+     * row starts, the offset in the byte array, the byte array itself, and the sample array.
+     */
     private interface RowDecoder {
         void decode(int width, int index, int offset, byte[] bytes, int[] samples);
     }
 
+    /**
+     * A no-op decoder that can be returned in the case of an unsupported bits per sample value.
+     */
     private static final RowDecoder NO_OP_DECODER = (width, index, offset, bytes, samples) -> {
         // no-op
     };
 
+    /**
+     * Selects the appropriate decoder for the given bits per sample and byte order.
+     * The returned decoder is a lambda function that takes the width, index, offset,
+     * the byte array, and the sample array, and decodes a row of data.
+     *
+     * @param bitsPerSample the number of bits per sample, either 16 or 32.
+     * @param byteOrder the byte order of the data, either LITTLE_ENDIAN or BIG_ENDIAN
+     * @return a RowDecoder that can decode a row of data with the specified bits per sample and byte order.
+     */
     private RowDecoder selectDecoder(final int bitsPerSample, final ByteOrder byteOrder) {
         if (bitsPerSample == 16) {
             return (width, index, offset, bytes, samples) ->
