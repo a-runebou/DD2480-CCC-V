@@ -591,10 +591,6 @@ public final class T4AndT6Compression {
             }
 
             return outputStream.toByteArray();
-        } catch (final IOException e) {
-            // Branch 22
-            accessedBranches.add("Branch 22");
-            throw new ImagingException("IOException during decompression", e);
         }
     }
 
