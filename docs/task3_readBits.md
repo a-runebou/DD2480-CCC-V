@@ -1,4 +1,10 @@
 ## Refactoring plan
+- The original complexity (according to lizard): 20
+- Expected change in complexity: 
+  - -7 decisions from the first switch
+  - -7 from the second switch
+  - This results in a complexity of approximately 6
+
 Change the switch
 ```
 switch (count) {
