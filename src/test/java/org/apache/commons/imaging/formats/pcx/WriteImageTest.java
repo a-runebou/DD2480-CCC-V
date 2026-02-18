@@ -16,13 +16,12 @@
  */
 package org.apache.commons.imaging.formats.pcx;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 class PcxWriterBitDepthTest {
@@ -46,16 +45,13 @@ class PcxWriterBitDepthTest {
             PcxImagingParameters params = new PcxImagingParameters()
                     .setBitDepth(32);
 
-            PcxWriter writer = new PcxWriter(params);
-
             ByteArrayOutputStream os = new ByteArrayOutputStream();
-            writer.writeImage(image, os);
+            new PcxWriter(params).writeImage(image, os);
 
             byte[] data = os.toByteArray();
 
-            int headerBitDepth = data[3];   // bits per pixel
-
-            assertEquals(32, headerBitDepth);
+            assertEquals(32, data[3] & 0xFF);
+            assertEquals(1, data[65] & 0xFF);
         }
 
         // CASE 2: bitDepthWanted = 24 (should become 8 bit, 3 planes)
@@ -63,16 +59,13 @@ class PcxWriterBitDepthTest {
             PcxImagingParameters params = new PcxImagingParameters()
                     .setBitDepth(24);
 
-            PcxWriter writer = new PcxWriter(params);
-
             ByteArrayOutputStream os = new ByteArrayOutputStream();
-            writer.writeImage(image, os);
+            new PcxWriter(params).writeImage(image, os);
 
             byte[] data = os.toByteArray();
 
-            int headerBitDepth = data[3];
-
-            assertEquals(8, headerBitDepth);
+            assertEquals(8, data[3] & 0xFF);
+            assertEquals(3, data[65] & 0xFF);
         }
 
         // CASE 3: bitDepthWanted = 8 (should become 8 bit, 1 plane)
@@ -80,41 +73,44 @@ class PcxWriterBitDepthTest {
             PcxImagingParameters params = new PcxImagingParameters()
                     .setBitDepth(8);
 
-            PcxWriter writer = new PcxWriter(params);
-
             ByteArrayOutputStream os = new ByteArrayOutputStream();
-            writer.writeImage(image, os);
+            new PcxWriter(params).writeImage(image, os);
 
             byte[] data = os.toByteArray();
 
-            int headerBitDepth = data[3];
-
-            assertEquals(8, headerBitDepth);
+            assertEquals(8, data[3] & 0xFF);
+            assertEquals(1, data[65] & 0xFF);
         }
     }
 
     @Test
-    void testWriteImage_Writes256ColorPaletteBlock() throws IOException {
-
-        BufferedImage image = createSimpleRgbImage();
+    void test4bit1plane() throws IOException {
+        // 9 unique colors -> palette.length() > 8 -> hit 5
+        // planesWanted == 1 -> hit 6
+        BufferedImage img = new BufferedImage(3, 3, BufferedImage.TYPE_INT_RGB);
+        int c = 1;
+        for (int y = 0; y < 3; y++) {
+            for (int x = 0; x < 3; x++) {
+                int rgb = ((c * 40) & 0xFF) << 16
+                        | ((c * 80) & 0xFF) << 8
+                        | ((c * 20) & 0xFF);
+                img.setRGB(x, y, rgb);
+                c++;
+            }
+        }
 
         PcxImagingParameters params = new PcxImagingParameters()
-                .setBitDepth(8);
-
-        PcxWriter writer = new PcxWriter(params);
+                .setBitDepth(4)
+                .setPlanes(1);
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-        writer.writeImage(image, os);
+        new PcxWriter(params).writeImage(img, os);
 
         byte[] data = os.toByteArray();
+        assertEquals(4, data[3] & 0xFF);
+        assertEquals(1, data[65] & 0xFF);
+    }
 
-        // Look for the 256-color palette marker byte (12)
-        boolean foundPaletteMarker = false;
-
-        for (int i = 0; i < data.length; i++) {
-            if ((data[i] & 0xFF) == 12) {
-                foundPaletteMarker = true;
-                break;
             }
         }
 
