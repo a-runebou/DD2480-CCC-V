@@ -149,13 +149,88 @@ public class BitInputStreamTest {
         // initialiize BitInputStream
         final BitInputStream bitInputStream = new BitInputStream(bais, ByteOrder.BIG_ENDIAN);
         assertThrows(IOException.class, () -> {
+            bitInputStream.readBits(15);
+        });
+        assertThrows(IOException.class, () -> {
             bitInputStream.readBits(-1);
         });
         assertThrows(IOException.class, () -> {
             bitInputStream.readBits(0);
         });
-        assertThrows(IOException.class, () -> {
-            bitInputStream.readBits(15);
-        });
+        
+    }
+
+    /**
+     * Contract:
+     * Trying to read 2, 3, or 4 bytes in Little Endian byte order with the readBits function
+     * shall return the correct result, assuming there is enough data to be read.
+     *
+     * Expected behavior:
+     * Given a count of 16, 24, and 32, a valid Input Stream, and Little Endian byte order, the readBits function shall
+     * return correct results for all of the calls, and shall not throw any exception.
+     */
+    @Test
+    void readingBytesLittleEndianWorksCorrectly() {
+        final byte[] data = new byte[] {
+            (byte) 0x12,
+            (byte) 0x13,
+            (byte) 0x21,
+            (byte) 0x32,
+            (byte) 0x43,
+            (byte) 0x54,
+            (byte) 0x55,
+            (byte) 0x56,
+            (byte) 0x57,
+            (byte) 0x00
+        };
+        final ByteArrayInputStream bais = new ByteArrayInputStream(data);
+        final BitInputStream bitInputStream = new BitInputStream(bais, ByteOrder.LITTLE_ENDIAN);
+        int result;
+        // first two bytes
+        result = assertDoesNotThrow(() -> bitInputStream.readBits(16));
+        assertEquals(0x1312, result);
+        // 3 bytes
+        result = assertDoesNotThrow(() -> bitInputStream.readBits(24));
+        assertEquals(0x433221, result);
+        // 4 bytes
+        result = assertDoesNotThrow(() -> bitInputStream.readBits(32));
+        assertEquals(0x57565554, result);
+    }
+
+     /**
+     * Contract:
+     * Trying to read 2, 3, or 4 bytes in Big Endian byte order with the readBits function
+     * shall return the correct result, assuming there is enough data to be read.
+     *
+     * Expected behavior:
+     * Given a count of 16, 24, and 32, a valid Input Stream, and Big Endian byte order, the readBits function shall
+     * return correct results for all of the calls, and shall not throw any exception.
+     */
+    @Test
+    void readingBytesBigEndianWorksCorrectly() {
+        final byte[] data = new byte[] {
+            (byte) 0x12,
+            (byte) 0x13,
+            (byte) 0x21,
+            (byte) 0x32,
+            (byte) 0x43,
+            (byte) 0x54,
+            (byte) 0x55,
+            (byte) 0x56,
+            (byte) 0x57,
+            (byte) 0x00
+        };
+        final ByteArrayInputStream bais = new ByteArrayInputStream(data);
+        final BitInputStream bitInputStream = new BitInputStream(bais, ByteOrder.BIG_ENDIAN);
+        int result;
+        // first two bytes
+        result = assertDoesNotThrow(() -> bitInputStream.readBits(16));
+        assertEquals(0x1213, result);
+        // 3 bytes
+        result = assertDoesNotThrow(() -> bitInputStream.readBits(24));
+        assertEquals(0x213243, result);
+        // 4 bytes
+        result = assertDoesNotThrow(() -> bitInputStream.readBits(32));
+        assertEquals(0x54555657, result);
     }
 }
