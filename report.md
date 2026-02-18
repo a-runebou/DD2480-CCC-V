@@ -148,6 +148,27 @@ Therefore the different outcomes are not very clear, and had to be deduced from 
     src/main/java/org/apache/commons/imaging/formats/png/PngImageParser.java
    ```
 
+### 2. `BitInputStream::readBits`
+   - **Author:** Josef Kahoun
+   - **ISSUE:** [#Issue 24](https://github.com/a-runebou/DD2480-CCC-V/issues/24)
+   
+
+   #### Refactoring Plan:
+   - The switch for individual bits `case 1:
+    return bits & 1;` can be rewritten as `retyrn bits & (1<<count)-1`.
+   - Isolate the last part which reads whole bytes into a self-contained method.
+     - Rewrite the switch with a `for` cycle, which will read a single byte in each cycle and apply left shift accordingly.
+
+   #### Impact:
+- **Cyclomatic complexity (CCN):** reduced from **20 to 6**
+- **Maintainability:** Improved readability, increased generalization of the function, added protection against negative number of bits.
+
+#### Re-production:
+- Branch: `issue/24`
+- Diff command:
+  ```bash
+  git diff master issue/24 src/main/java/org/apache/commons/imaging/formats/tiff/datareaders/BitInputStream.java
+   ```
 
 ## Coverage
 
@@ -172,22 +193,15 @@ Overall, no additional configuration was required beyond running the documented 
 
 All of us implemented a similar manual branch coverage, which consisted of a static boolean array, and hit markers written into each branch.
 
-**Function 1:**
+**Function 1: `readBits`**
 
-Related issue [add issue]()
+Related issue: [issue/12](https://github.com/a-runebou/DD2480-CCC-V/issues/12)
 
-Patch: `git diff ...`
+To visualize the code instrumentation: 
+```bash
+git diff master issue/12 src/main/java/org/apache/commons/imaging/formats/tiff/datareaders/BitInputStream.java
+```
 
-Show a patch (or link to a branch) that shows the instrumented code to
-gather coverage measurements.
-
-The patch is probably too long to be copied here, so please add
-the git command that is used to obtain the patch instead:
-
-git diff ...
-
-What kinds of constructs does your tool support, and how accurate is
-its output?
 
 ### Evaluation
 
