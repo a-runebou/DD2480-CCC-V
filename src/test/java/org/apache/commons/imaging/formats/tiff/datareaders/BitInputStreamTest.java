@@ -106,4 +106,56 @@ public class BitInputStreamTest {
             bitInputStream.readBits(4);
         });
     }
+
+    /**
+     * Contract:
+     * Trying to read one or more bytes with readBits() while there are still bits in the cache shall throw an Exception,
+     * as reading across byte boundary is not allowed.
+     *
+     * Expected behavior:
+     * Reading firstly 3 bits, and then trying to read one byte (8 bits) shall throw an Exception,
+     * as there are still 5 bits in the cache which need to be read or discarded.
+     */
+    @Test
+    void readingByteWhileCachedBitsRemainThrowsException() {
+        final byte[] data = new byte[] {
+            (byte) 0b10101101,
+            (byte) 0b11110011
+        };
+        final ByteArrayInputStream bais = new ByteArrayInputStream(data);
+        // initialiize BitInputStream
+        final BitInputStream bitInputStream = new BitInputStream(bais, ByteOrder.BIG_ENDIAN);
+        assertDoesNotThrow(() -> bitInputStream.readBits(3));
+        assertThrows(IOException.class, () -> {
+            bitInputStream.readBits(8);
+        });
+    }
+
+    /**
+     * Contract:
+     * The readBits function shall allow reading the following number of bits: 1 to 8, 16, 24, and 32.
+     * If the function is called with any other input number, it shall throw an Exception.
+     *
+     * Expected behavior:
+     * Trying to read -1, 0, or 15 bits shall result in an Exception.
+     */
+    @Test
+    void readingInvalidNumberOfBitsThrowsException() {
+        final byte[] data = new byte[] {
+            (byte) 0b10101101,
+            (byte) 0b11110011
+        };
+        final ByteArrayInputStream bais = new ByteArrayInputStream(data);
+        // initialiize BitInputStream
+        final BitInputStream bitInputStream = new BitInputStream(bais, ByteOrder.BIG_ENDIAN);
+        assertThrows(IOException.class, () -> {
+            bitInputStream.readBits(-1);
+        });
+        assertThrows(IOException.class, () -> {
+            bitInputStream.readBits(0);
+        });
+        assertThrows(IOException.class, () -> {
+            bitInputStream.readBits(15);
+        });
+    }
 }
