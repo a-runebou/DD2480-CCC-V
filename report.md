@@ -86,9 +86,17 @@ its output?
 
 1. How detailed is your coverage measurement?
 
+It IDs each branch and stores the branch ID global if it was reached during unit tests.
+An else statement was added for each if missing one aswell as a catch for each try missing one
+
 2. What are the limitations of your own tool?
 
+The limitations are that it does not explicitly say what blocks of code were not reached, rather only the ID of the block.
+Furthermore it does not neatly present the results of coverage at the end of the run, but is spread out during the run.
+
 3. Are the results of your tool consistent with existing coverage tools?
+
+It is consitent with which branches are reached, however jacoco counts many more branches than the self implemented coverage measurement. I believe it is due to jacoco double counting branches in the case of elif statements.
 
 ## Coverage improvement
 
