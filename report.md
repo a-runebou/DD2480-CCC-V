@@ -182,22 +182,15 @@ The project README even came with a shell command to generate the JaCoCo coverag
 
 All of us implemented a similar manual branch coverage, which consisted of a static boolean array, and hit markers written into each branch.
 
-**Function 1:**
+**Function 1: `readBits`**
 
-Related issue [add issue]()
+Related issue: [issue/12](https://github.com/a-runebou/DD2480-CCC-V/issues/12)
 
-Patch: `git diff ...`
+To visualize the code instrumentation: 
+```bash
+git diff master issue/12 src/main/java/org/apache/commons/imaging/formats/tiff/datareaders/BitInputStream.java
+```
 
-Show a patch (or link to a branch) that shows the instrumented code to
-gather coverage measurements.
-
-The patch is probably too long to be copied here, so please add
-the git command that is used to obtain the patch instead:
-
-git diff ...
-
-What kinds of constructs does your tool support, and how accurate is
-its output?
 
 ### Evaluation
 
