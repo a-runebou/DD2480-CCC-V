@@ -195,13 +195,7 @@ Number of test cases added: two per team member (P) or at least four (P+).
 
 ## Self-assessment: Way of working
 
-Current state according to the Essence standard: ...
-
-Was the self-assessment unanimous? Any doubts about certain items?
-
-How have you improved so far?
-
-Where is potential for improvement?
+Right now, our team is in the `Working Well` state. By changing our method of operation to suit the current situation, we are making the anticipated progress. Our tools complement our work rather than obstruct it, practices are applied seamlessly in our daily tasks (documentation frequently follows immediately), and we continuously improve both practices and tools as we gain knowledge. The majority of the self-evaluations are in agreement. Overall, the indicators fit `Working Well`, with some minor doubts about consistency (e.g., documenting decisions immediately vs. after implementation) and whether all members apply the workflow equally across tasks. Clearer task ownership, more seamless change integration, faster feedback through testing and reviews, and a workflow that more closely reflects our actual operations are some of the ways we increased coordination and predictability.
 
 ## Overall experience
 
