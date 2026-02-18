@@ -54,60 +54,10 @@ final class PcxWriter {
         final SimplePalette palette = paletteFactory.makeExactRgbPaletteSimple(src, 256);
         @SuppressWarnings("resource") // Caller closes 'os'.
         final AbstractBinaryOutputStream bos = AbstractBinaryOutputStream.littleEndian(os);
-        final int bitDepth;
-        final int planes;
-        if (palette == null || bitDepthWanted == 24 || bitDepthWanted == 32) {
-            if (bitDepthWanted == 32) {
-                bitDepth = 32;
-                planes = 1;
-            } else {
-                bitDepth = 8;
-                planes = 3;
-            }
-        } else if (palette.length() > 16 || bitDepthWanted == 8) {
-            bitDepth = 8;
-            planes = 1;
-        } else if (palette.length() > 8 || bitDepthWanted == 4) {
-            if (planesWanted == 1) {
-                bitDepth = 4;
-                planes = 1;
-            } else {
-                bitDepth = 1;
-                planes = 4;
-            }
-        } else if (palette.length() > 4 || bitDepthWanted == 3) {
-            bitDepth = 1;
-            planes = 3;
-        } else if (palette.length() > 2 || bitDepthWanted == 2) {
-            if (planesWanted == 2) {
-                bitDepth = 1;
-                planes = 2;
-            } else {
-                bitDepth = 2;
-                planes = 1;
-            }
-        } else {
-            boolean onlyBlackAndWhite = true;
-            if (palette.length() >= 1) {
-                final int rgb = palette.getEntry(0);
-                if (rgb != 0 && rgb != 0xffffff) {
-                    onlyBlackAndWhite = false;
-                }
-            }
-            if (palette.length() == 2) {
-                final int rgb = palette.getEntry(1);
-                if (rgb != 0 && rgb != 0xffffff) {
-                    onlyBlackAndWhite = false;
-                }
-            }
-            if (onlyBlackAndWhite) {
-                bitDepth = 1;
-                planes = 1;
-            } else {
-                bitDepth = 1;
-                planes = 2;
-            }
-        }
+
+        final int[] bitDepthAndPlanes = getBitDepthAndPlanes(palette);
+        final int bitDepth = bitDepthAndPlanes[0];
+        final int planes = bitDepthAndPlanes[1];
 
         int bytesPerLine = (bitDepth * src.getWidth() + 7) / 8;
         if (bytesPerLine % 2 != 0) {
@@ -171,6 +121,66 @@ final class PcxWriter {
                 bos.write(rgb & 0xff);
             }
         }
+    }
+
+    private int[] getBitDepthAndPlanes(final SimplePalette palette) {
+        final int bitDepth;
+        final int planes;
+
+        if (palette == null || bitDepthWanted == 24 || bitDepthWanted == 32) {
+            if (bitDepthWanted == 32) {
+                bitDepth = 32;
+                planes = 1;
+            } else {
+                bitDepth = 8;
+                planes = 3;
+            }
+        } else if (palette.length() > 16 || bitDepthWanted == 8) {
+            bitDepth = 8;
+            planes = 1;
+        } else if (palette.length() > 8 || bitDepthWanted == 4) {
+            if (planesWanted == 1) {
+                bitDepth = 4;
+                planes = 1;
+            } else {
+                bitDepth = 1;
+                planes = 4;
+            }
+        } else if (palette.length() > 4 || bitDepthWanted == 3) {
+            bitDepth = 1;
+            planes = 3;
+        } else if (palette.length() > 2 || bitDepthWanted == 2) {
+            if (planesWanted == 2) {
+                bitDepth = 1;
+                planes = 2;
+            } else {
+                bitDepth = 2;
+                planes = 1;
+            }
+        } else {
+            boolean onlyBlackAndWhite = true;
+            if (palette.length() >= 1) {
+                final int rgb = palette.getEntry(0);
+                if (rgb != 0 && rgb != 0xffffff) {
+                    onlyBlackAndWhite = false;
+                }
+            }
+            if (palette.length() == 2) {
+                final int rgb = palette.getEntry(1);
+                if (rgb != 0 && rgb != 0xffffff) {
+                    onlyBlackAndWhite = false;
+                }
+            }
+            if (onlyBlackAndWhite) {
+                bitDepth = 1;
+                planes = 1;
+            } else {
+                bitDepth = 1;
+                planes = 2;
+            }
+        }
+
+        return new int[] { bitDepth, planes };
     }
 
     private void writePixels(final BufferedImage src, final int bitDepth, final int planes, final int bytesPerLine, final SimplePalette palette,
