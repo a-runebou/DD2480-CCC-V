@@ -14,7 +14,39 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
+## Coverage Output:
+```bash
+=== MANUAL BRANCH COVERAGE REPORT ===
+GII_01_TRUE_chunksEmpty -> 0
+GII_01_FALSE_chunksNotEmpty -> 40
+GII_02_TRUE_badIHDRCount -> 0
+GII_02_FALSE_oneIHDR -> 40
+GII_03_TRUE_hasTRNS -> 9
+GII_03_FALSE_noTRNS -> 31
+GII_04_TRUE_multiPHYS_throw -> 0
+GII_04_FALSE_notMultiPHYS -> 40
+GII_05_TRUE_onePHYS_set -> 21
+GII_05_FALSE_zeroPHYS -> 19
+GII_06_TRUE_multiSCAL_throw -> 0
+GII_06_FALSE_notMultiSCAL -> 40
+GII_07_TRUE_oneSCAL_set -> 2
+GII_07_FALSE_zeroSCAL -> 38
+GII_08_TRUE_sCAL_unitMeters -> 1
+GII_08_FALSE_sCAL_unitRadians -> 1
+GII_09_TRUE_pHYs_unitMeters -> 15
+GII_09_FALSE_pHYs_notMetersOrNull -> 25
+GII_10_TRUE_hasPLTE -> 7
+GII_10_FALSE_noPLTE -> 33
+GII_SW_GRAY -> 11
+GII_SW_RGB -> 29
+GII_SW_DEFAULT -> 0
+=== END REPORT ===
 
+```
+> Note:
+`GII_01_FALSE_chunksNotEmpty -> 40`
+ means the “chunks not empty” branch in `getImageInfo` was covered 40 times during the test run.
+## Questions:
 ### What is the quality of your own coverage measurement? Does it take into account ternary operators(condition ? yes : no) and exceptions, if available in your language?
 > My manual coverage measurement is reasonably accurate for the exact branches I explicitly instrumented in the code directly, but it is not a complete “branch coverage” measurement of the whole function/program.
 
