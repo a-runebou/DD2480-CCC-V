@@ -27,6 +27,22 @@ import org.apache.commons.imaging.palette.PaletteFactory;
 import org.apache.commons.imaging.palette.SimplePalette;
 
 final class PcxWriter {
+
+    //DIY COVERAGE (writeImage) 
+    private static final int MAX_BRANCHES = 100;
+    private static final boolean[] hits = new boolean[MAX_BRANCHES];
+    private static int highestId = -1;
+    private static boolean reported = false;
+
+    private static void hit(final int id) {
+        if (id >= 0 && id < MAX_BRANCHES) {
+            hits[id] = true;
+            if (id > highestId) {
+                highestId = id;
+            }
+        }
+    }
+
     private final int encoding;
     private final int bitDepthWanted;
     private final int planesWanted;
