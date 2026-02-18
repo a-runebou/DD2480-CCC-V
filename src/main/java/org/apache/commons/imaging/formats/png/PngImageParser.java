@@ -231,6 +231,66 @@ public class PngImageParser extends AbstractImageParser<PngImagingParameters> im
         return PhysicalScale.UNDEFINED;
     }
 
+    /**
+     * Collects text chunks into comments and text chunk lists.
+     *
+     * @param chunks the list of chunks to search
+     * @param comments the list to collect comment strings
+     * @param textChunks the list to collect AbstractPngText objects
+     */
+    private static void collectTextChunks(final List<PngChunk> chunks, final List<String> comments, final List<AbstractPngText> textChunks) {
+        final List<PngChunk> tEXts = filterChunks(chunks, ChunkType.tEXt);
+        final List<PngChunk> zTXts = filterChunks(chunks, ChunkType.zTXt);
+        final List<PngChunk> iTXts = filterChunks(chunks, ChunkType.iTXt);
+
+        for (final PngChunk tEXt : tEXts) {
+            final PngChunkText pngChunktEXt = (PngChunkText) tEXt;
+            comments.add(pngChunktEXt.getKeyword() + ": " + pngChunktEXt.getText());
+            textChunks.add(pngChunktEXt.getContents());
+        }
+        for (final PngChunk zTXt : zTXts) {
+            final PngChunkZtxt pngChunkzTXt = (PngChunkZtxt) zTXt;
+            comments.add(pngChunkzTXt.getKeyword() + ": " + pngChunkzTXt.getText());
+            textChunks.add(pngChunkzTXt.getContents());
+        }
+        for (final PngChunk iTXt : iTXts) {
+            final PngChunkItxt pngChunkiTXt = (PngChunkItxt) iTXt;
+            comments.add(pngChunkiTXt.getKeyword() + ": " + pngChunkiTXt.getText());
+            textChunks.add(pngChunkiTXt.getContents());
+        }
+    }
+
+    /**
+     * Computes physical dimension information from pHYs chunk.
+     *
+     * @param phys the pHYs chunk (may be null)
+     * @param width image width in pixels
+     * @param height image height in pixels
+     * @return physical dimension info
+     */
+    private static PhysicalInfo computePhysicalInfo(final PngChunkPhys phys, final int width, final int height) {
+        final PhysicalInfo info = new PhysicalInfo();
+        if (phys != null && phys.getUnitSpecifier() == 1) { // meters
+            final double metersPerInch = 0.0254;
+
+            info.physicalWidthDpi = (int) Math.round(phys.getPixelsPerUnitXAxis() * metersPerInch);
+            info.physicalWidthInch = (float) (width / (phys.getPixelsPerUnitXAxis() * metersPerInch));
+            info.physicalHeightDpi = (int) Math.round(phys.getPixelsPerUnitYAxis() * metersPerInch);
+            info.physicalHeightInch = (float) (height / (phys.getPixelsPerUnitYAxis() * metersPerInch));
+        }
+        return info;
+    }
+
+    /**
+     * Holds physical dimension information.
+     */
+    private static class PhysicalInfo {
+        int physicalWidthDpi = -1;
+        int physicalHeightDpi = -1;
+        float physicalWidthInch = -1;
+        float physicalHeightInch = -1;
+    }
+
     @Override
     protected String[] getAcceptedExtensions() {
         return ACCEPTED_EXTENSIONS.clone();
@@ -520,21 +580,7 @@ public class PngImageParser extends AbstractImageParser<PngImagingParameters> im
         final List<String> comments = Allocator.arrayList(chunkCount);
         final List<AbstractPngText> textChunks = Allocator.arrayList(chunkCount);
 
-        for (final PngChunk tEXt : tEXts) {
-            final PngChunkText pngChunktEXt = (PngChunkText) tEXt;
-            comments.add(pngChunktEXt.getKeyword() + ": " + pngChunktEXt.getText());
-            textChunks.add(pngChunktEXt.getContents());
-        }
-        for (final PngChunk zTXt : zTXts) {
-            final PngChunkZtxt pngChunkzTXt = (PngChunkZtxt) zTXt;
-            comments.add(pngChunkzTXt.getKeyword() + ": " + pngChunkzTXt.getText());
-            textChunks.add(pngChunkzTXt.getContents());
-        }
-        for (final PngChunk iTXt : iTXts) {
-            final PngChunkItxt pngChunkiTXt = (PngChunkItxt) iTXt;
-            comments.add(pngChunkiTXt.getKeyword() + ": " + pngChunkiTXt.getText());
-            textChunks.add(pngChunkiTXt.getContents());
-        }
+        collectTextChunks(chunks, comments, textChunks);
 
         final int bitsPerPixel = pngChunkIHDR.getBitDepth() * pngChunkIHDR.getPngColorType().getSamplesPerPixel();
         final ImageFormat format = ImageFormats.PNG;
@@ -545,28 +591,7 @@ public class PngImageParser extends AbstractImageParser<PngImagingParameters> im
         final int width = pngChunkIHDR.getWidth();
         final boolean progressive = pngChunkIHDR.getInterlaceMethod().isProgressive();
 
-        int physicalHeightDpi = -1;
-        float physicalHeightInch = -1;
-        int physicalWidthDpi = -1;
-        float physicalWidthInch = -1;
-
-        // if (pngChunkpHYs != null)
-        // {
-        // System.out.println("\tpngChunkpHYs.UnitSpecifier: " +
-        // pngChunkpHYs.UnitSpecifier );
-        // System.out.println("\tpngChunkpHYs.PixelsPerUnitYAxis: " +
-        // pngChunkpHYs.PixelsPerUnitYAxis );
-        // System.out.println("\tpngChunkpHYs.PixelsPerUnitXAxis: " +
-        // pngChunkpHYs.PixelsPerUnitXAxis );
-        // }
-        if (pngChunkpHYs != null && pngChunkpHYs.getUnitSpecifier() == 1) { // meters
-            final double metersPerInch = 0.0254;
-
-            physicalWidthDpi = (int) Math.round(pngChunkpHYs.getPixelsPerUnitXAxis() * metersPerInch);
-            physicalWidthInch = (float) (width / (pngChunkpHYs.getPixelsPerUnitXAxis() * metersPerInch));
-            physicalHeightDpi = (int) Math.round(pngChunkpHYs.getPixelsPerUnitYAxis() * metersPerInch);
-            physicalHeightInch = (float) (height / (pngChunkpHYs.getPixelsPerUnitYAxis() * metersPerInch));
-        }
+        final PhysicalInfo physicalInfo = computePhysicalInfo(pngChunkpHYs, width, height);
 
         boolean usesPalette = false;
 
@@ -593,8 +618,8 @@ public class PngImageParser extends AbstractImageParser<PngImagingParameters> im
         final String formatDetails = "Png";
         final ImageInfo.CompressionAlgorithm compressionAlgorithm = ImageInfo.CompressionAlgorithm.PNG_FILTER;
 
-        return new PngImageInfo(formatDetails, bitsPerPixel, comments, format, formatName, height, mimeType, numberOfImages, physicalHeightDpi,
-                physicalHeightInch, physicalWidthDpi, physicalWidthInch, width, progressive, transparent, usesPalette, colorType, compressionAlgorithm,
+        return new PngImageInfo(formatDetails, bitsPerPixel, comments, format, formatName, height, mimeType, numberOfImages, physicalInfo.physicalHeightDpi,
+                physicalInfo.physicalHeightInch, physicalInfo.physicalWidthDpi, physicalInfo.physicalWidthInch, width, progressive, transparent, usesPalette, colorType, compressionAlgorithm,
                 textChunks, physicalScale);
     }
 
