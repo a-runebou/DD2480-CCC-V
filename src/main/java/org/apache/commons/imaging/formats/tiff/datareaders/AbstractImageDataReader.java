@@ -774,6 +774,34 @@ public abstract class AbstractImageDataReader {
         return samples;
     }
 
+    private void decode16BitRow(final int width, final int index, int offset,
+            final byte[] bytes, final ByteOrder byteOrder, final int[] samples) {
+        if (byteOrder == ByteOrder.LITTLE_ENDIAN) {
+            for (int j = 0; j < width; j++, offset += 2) {
+                samples[index + j] = bytes[offset + 1] << 8 | bytes[offset] & 0xff;
+            }
+        } else {
+            for (int j = 0; j < width; j++, offset += 2) {
+                samples[index + j] = bytes[offset] << 8 | bytes[offset + 1] & 0xff;
+            }
+        }
+    }
+
+    private void decode32BitRow(final int width, final int index, int offset,
+            final byte[] bytes, final ByteOrder byteOrder, final int[] samples) {
+        if (byteOrder == ByteOrder.LITTLE_ENDIAN) {
+            for (int j = 0; j < width; j++, offset += 4) {
+                samples[index + j] = bytes[offset + 3] << 24 | (bytes[offset + 2] & 0xff) << 16 | (bytes[offset + 1] & 0xff) << 8
+                        | bytes[offset] & 0xff;
+            }
+        } else {
+            for (int j = 0; j < width; j++, offset += 4) {
+                samples[index + j] = bytes[offset] << 24 | (bytes[offset + 1] & 0xff) << 16 | (bytes[offset + 2] & 0xff) << 8
+                        | bytes[offset + 3] & 0xff;
+            }
+        }
+    }
+
     /**
      * Given a source file that specifies numerical data as short integers, unpack the raw bytes obtained from the source file and organize them into an array
      * of integers.
@@ -810,29 +838,11 @@ public abstract class AbstractImageDataReader {
 
         for (int i = 0; i < length; i++) {
             final int index = i * scanSize;
-            int offset = index * bytesPerSample;
+            final int offset = index * bytesPerSample;
             if (bitsPerSample == 16) {
-                if (byteOrder == ByteOrder.LITTLE_ENDIAN) {
-                    for (int j = 0; j < width; j++, offset += 2) {
-                        samples[index + j] = bytes[offset + 1] << 8 | bytes[offset] & 0xff;
-                    }
-                } else {
-                    for (int j = 0; j < width; j++, offset += 2) {
-                        samples[index + j] = bytes[offset] << 8 | bytes[offset + 1] & 0xff;
-                    }
-                }
+                decode16BitRow(width, index, offset, bytes, byteOrder, samples);
             } else if (bitsPerSample == 32) {
-                if (byteOrder == ByteOrder.LITTLE_ENDIAN) {
-                    for (int j = 0; j < width; j++, offset += 4) {
-                        samples[index + j] = bytes[offset + 3] << 24 | (bytes[offset + 2] & 0xff) << 16 | (bytes[offset + 1] & 0xff) << 8
-                                | bytes[offset] & 0xff;
-                    }
-                } else {
-                    for (int j = 0; j < width; j++, offset += 4) {
-                        samples[index + j] = bytes[offset] << 24 | (bytes[offset + 1] & 0xff) << 16 | (bytes[offset + 2] & 0xff) << 8
-                                | bytes[offset + 3] & 0xff;
-                    }
-                }
+                decode32BitRow(width, index, offset, bytes, byteOrder, samples);
             }
             if (useDifferencing) {
                 for (int j = 1; j < width; j++) {
