@@ -824,6 +824,28 @@ public abstract class AbstractImageDataReader {
         }
     }
 
+    // Decoder
+    private interface RowDecoder {
+        void decode(int width, int index, int offset, byte[] bytes, int[] samples);
+    }
+
+    private static final RowDecoder NO_OP_DECODER = (width, index, offset, bytes, samples) -> {
+        // no-op
+    };
+
+    private RowDecoder selectDecoder(final int bitsPerSample, final ByteOrder byteOrder) {
+        if (bitsPerSample == 16) {
+            return (width, index, offset, bytes, samples) ->
+                decode16BitRow(width, index, offset, bytes, byteOrder, samples);
+        } else if (bitsPerSample == 32) {
+            return (width, index, offset, bytes, samples) ->
+                decode32BitRow(width, index, offset, bytes, byteOrder, samples);
+        } else {
+            return NO_OP_DECODER;
+        }
+    }
+
+
     /**
      * Given a source file that specifies numerical data as short integers, unpack the raw bytes obtained from the source file and organize them into an array
      * of integers.
@@ -849,6 +871,7 @@ public abstract class AbstractImageDataReader {
         final int length = bytes.length < nBytes ? nBytes / scanSize : height;
 
         final int[] samples = Allocator.intArray(scanSize * height);
+        final RowDecoder decoder = selectDecoder(bitsPerSample, byteOrder);
         // At this time, Commons Imaging only supports two-byte
         // two's complement short integers. It is assumed that
         // the calling module already checked the arguments for
@@ -861,11 +884,10 @@ public abstract class AbstractImageDataReader {
         for (int i = 0; i < length; i++) {
             final int index = i * scanSize;
             final int offset = index * bytesPerSample;
-            if (bitsPerSample == 16) {
-                decode16BitRow(width, index, offset, bytes, byteOrder, samples);
-            } else if (bitsPerSample == 32) {
-                decode32BitRow(width, index, offset, bytes, byteOrder, samples);
-            }
+
+            // Decoding the row of bytes into integer samples
+            decoder.decode(width, index, offset, bytes, samples);
+
             if (useDifferencing) {
                 applyDifferencing(samples, index, width);
             }
