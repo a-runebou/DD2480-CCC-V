@@ -774,6 +774,12 @@ public abstract class AbstractImageDataReader {
         return samples;
     }
 
+    private void applyDifferencing(final int[] samples, final int index, final int width) {
+        for (int j = 1; j < width; j++) {
+            samples[index + j] += samples[index + j - 1];
+        }
+    }
+
     private void decode16BitRow(final int width, final int index, int offset,
             final byte[] bytes, final ByteOrder byteOrder, final int[] samples) {
         if (byteOrder == ByteOrder.LITTLE_ENDIAN) {
@@ -845,9 +851,7 @@ public abstract class AbstractImageDataReader {
                 decode32BitRow(width, index, offset, bytes, byteOrder, samples);
             }
             if (useDifferencing) {
-                for (int j = 1; j < width; j++) {
-                    samples[index + j] += samples[index + j - 1];
-                }
+                applyDifferencing(samples, index, width);
             }
         }
 
