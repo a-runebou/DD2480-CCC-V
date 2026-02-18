@@ -401,6 +401,39 @@ public abstract class AbstractImageDataReader {
      * @param rasterWidth  width of the raster (always smaller than source data)
      * @param rasterHeight height of the raster (always smaller than source data)
      * @param rasterData   the raster data.
+     *
+     * Requirements:
+     * R1: The method transfers pixel sample data from a TIFF block (blockData)
+     * to a floating point raster buffer (rasterData).
+     *
+     * R2: Only the overlapping region between the src block and target raster
+     * shall be copied. Areas outside must be ignored.
+     *
+     * R3: Coordinates are translated from source-space to raster-space.
+     * - xBlock, yBlock define block origin in source coordinates
+     * - xRaster, yRaster define raster origin in source coordinates
+     * - Internal offsets (xR0, yR0, xB0, yB0) must ensure valid indexing.
+     *
+     * R4: No transfer shall occur if the computed overlap width or height
+     * is <= 0.
+     *
+     * R5: Copied width and height are bounded by the block dimensions.
+     *
+     * R6: Source data (blockData) contains float values encoded as int bits
+     * and must be converted.
+     *
+     * R7: If samplesPerPixel == 1, data is copied directly.
+     *
+     * R8: If samplesPerPixel > 1 and planarConfiguration is CHUNKY
+     * - Source data is chunky
+     * - Target raster is planar
+     * - Data must be converted from chunky to planar
+     *
+     * R9: If samplesPerPixel > 1 and planarConfiguration is not CHUNKY
+     * - Source data is planar
+     * - Copy is done plane-by-plane
+     *
+     * R10: All indicies must be within bounds of blockData and rasterData.
      */
     void transferBlockToRaster(final int xBlock, final int yBlock, final int blockWidth, final int blockHeight, final int[] blockData, final int xRaster,
             final int yRaster, final int rasterWidth, final int rasterHeight, final int samplesPerPixel, final float[] rasterData) {
