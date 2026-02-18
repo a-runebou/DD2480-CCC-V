@@ -55,6 +55,9 @@ final class BitInputStream extends FilterInputStream {
     }
 
     public int readBits(final int count) throws IOException {
+        if (count < 1 || count > 32) {
+            throw new IllegalArgumentException("BitInputStream: count must be between 1 and 32");
+        }
         if (count < 8) {
             if (cacheBitsRemaining == 0) {
                 // fill cache
@@ -69,68 +72,46 @@ final class BitInputStream extends FilterInputStream {
             // int bits_to_shift = cache_bits_remaining - count;
             cacheBitsRemaining -= count;
             final int bits = cache >> cacheBitsRemaining;
-
-            switch (count) {
-            case 1:
-                return bits & 1;
-            case 2:
-                return bits & 3;
-            case 3:
-                return bits & 7;
-            case 4:
-                return bits & 15;
-            case 5:
-                return bits & 31;
-            case 6:
-                return bits & 63;
-            case 7:
-                return bits & 127;
-            }
-
+            return bits & ((1 << count) - 1);
         }
         if (cacheBitsRemaining > 0) {
             throw new ImagingException("BitInputStream: incomplete bit read");
         }
+        return readBytes(count);
+    }
 
-        if (count == 8) {
+    /**
+     * Reads 2,3, or 4 bytes (specified in bits) and returns the read value according to the Endian encoding.
+     *
+     * @param count the number of BITS!
+     * @return the read value
+     * @throws IOException
+     */
+    private int readBytes(int count) throws IOException {
+        if (count % 8 != 0) {
+            throw new IllegalArgumentException("BitInputStream: count must be a multiple of 8");
+        }
+        count /= 8;
+        if (count == 1) {
             bytesRead++;
             return in.read();
         }
-
         /**
          * Taking default order of the TIFF to be Little Endian and reversing the bytes in the end if its Big Endian.This is done because majority (may be all)
          * of the files will be of Little Endian.
          */
+        int result = 0;
         if (byteOrder == ByteOrder.BIG_ENDIAN) {
-            switch (count) {
-            case 16:
-                bytesRead += 2;
-                return in.read() << 8 | in.read() << 0;
-            case 24:
-                bytesRead += 3;
-                return in.read() << 16 | in.read() << 8 | in.read() << 0;
-            case 32:
-                bytesRead += 4;
-                return in.read() << 24 | in.read() << 16 | in.read() << 8 | in.read() << 0;
-            default:
-                break;
+            for (int i = 0; i < count; i++) {
+                bytesRead++;
+                result = (result << 8) | in.read();
             }
         } else {
-            switch (count) {
-            case 16:
-                bytesRead += 2;
-                return in.read() << 0 | in.read() << 8;
-            case 24:
-                bytesRead += 3;
-                return in.read() << 0 | in.read() << 8 | in.read() << 16;
-            case 32:
-                bytesRead += 4;
-                return in.read() << 0 | in.read() << 8 | in.read() << 16 | in.read() << 24;
-            default:
-                break;
+            for (int i = 0; i < count; i++) {
+                bytesRead++;
+                result = result | (in.read() << (i * 8));
             }
         }
-
-        throw new ImagingException("BitInputStream: unknown error");
+        return result;
     }
 }
