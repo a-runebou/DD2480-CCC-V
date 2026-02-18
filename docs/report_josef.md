@@ -15,7 +15,7 @@
  limitations under the License.
 -->
 
-# Part 1 - Complexity measurement
+# Part 1: Complexity measurement
 ## Summary for function `performNextMedianCut`
 
 ### What are your results? Did everyone get the same result? Is there something that is unclear? If you have a tool, is its result the same as yours?
@@ -43,8 +43,25 @@ However, the `catch` keyword is counted as an additional decision.
 The function `performNextMedianCut` lacks any sort of documentation, either in the form of Javadoc or normal comments.
 Therefore the different outcomes are not very clear, and had to be deduced from the source code.
 
-# Part 2 - Coverage measurement and improvement
-## Task 1 - DIY: manual branch coverage for `readBits`
+# Part 2: Coverage measurement and improvement
+## Task 1: DIY: manual branch coverage for `readBits`
 Linked issue: [issue/12](https://github.com/a-runebou/DD2480-CCC-V/issues/12)
 
 To visualize the code instrumentation: `git diff master issue/12`
+
+## Task 2: Coverage improvement for `readBits`
+Linked issue: [issue/18](https://github.com/a-runebou/DD2480-CCC-V/issues/18)
+
+The class `BitInputStream.java` (located in `formats/tiff/datareaders`) did not have any dedicated unit tests, therefore expanding on existing tests was impossible. 
+New tests were written in a dedicated test file.
+The function is public, so it could be called directly, and no additional interfaces were needed to be implemented. 
+The only data structure needed was the input stream, which was fairly easy to create.
+
+In total, the coverage was improved from 8/28 to 27/28.
+
+The old coverage reported by JaCoCo:
+![Old Coverage](/assets/coverage/readBits/read_bits_old_coverage.png)
+The new coverage reported by JaCoCo:
+![New Coverage](/assets/coverage/readBits/read_bits_new_coverage.png)
+
+To visualize the code changes: `git diff master issue/18`
