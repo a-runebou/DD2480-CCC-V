@@ -102,7 +102,8 @@ final class PcxWriter {
         if (params == null) {
             params = new PcxImagingParameters();
         }
-        encoding = params.getCompression() == PcxConstants.PCX_COMPRESSION_UNCOMPRESSED ? PcxImageParser.PcxHeader.ENCODING_UNCOMPRESSED
+        encoding = params.getCompression() == PcxConstants.PCX_COMPRESSION_UNCOMPRESSED
+                ? PcxImageParser.PcxHeader.ENCODING_UNCOMPRESSED
                 : PcxImageParser.PcxHeader.ENCODING_RLE;
         rleWriter = new RleWriter(encoding != PcxImageParser.PcxHeader.ENCODING_UNCOMPRESSED);
         bitDepthWanted = params.getBitDepth();
@@ -113,60 +114,93 @@ final class PcxWriter {
     }
 
     public void writeImage(final BufferedImage src, final OutputStream os) throws IOException {
+        hit(0);
+
         final PaletteFactory paletteFactory = new PaletteFactory();
         final SimplePalette palette = paletteFactory.makeExactRgbPaletteSimple(src, 256);
         @SuppressWarnings("resource") // Caller closes 'os'.
         final AbstractBinaryOutputStream bos = AbstractBinaryOutputStream.littleEndian(os);
+
         final int bitDepth;
         final int planes;
+
         if (palette == null || bitDepthWanted == 24 || bitDepthWanted == 32) {
+            hit(1);
             if (bitDepthWanted == 32) {
+                hit(2);
                 bitDepth = 32;
                 planes = 1;
             } else {
+                hit(3);
                 bitDepth = 8;
                 planes = 3;
             }
         } else if (palette.length() > 16 || bitDepthWanted == 8) {
+            hit(4);
             bitDepth = 8;
             planes = 1;
         } else if (palette.length() > 8 || bitDepthWanted == 4) {
+            hit(5);
             if (planesWanted == 1) {
+                hit(6);
                 bitDepth = 4;
                 planes = 1;
             } else {
+                hit(7);
                 bitDepth = 1;
                 planes = 4;
             }
         } else if (palette.length() > 4 || bitDepthWanted == 3) {
+            hit(8);
             bitDepth = 1;
             planes = 3;
         } else if (palette.length() > 2 || bitDepthWanted == 2) {
+            hit(9);
             if (planesWanted == 2) {
+                hit(10);
                 bitDepth = 1;
                 planes = 2;
             } else {
+                hit(11);
                 bitDepth = 2;
                 planes = 1;
             }
         } else {
+            hit(12);
             boolean onlyBlackAndWhite = true;
+
             if (palette.length() >= 1) {
+                hit(13);
                 final int rgb = palette.getEntry(0);
                 if (rgb != 0 && rgb != 0xffffff) {
+                    hit(14);
                     onlyBlackAndWhite = false;
+                } else {
+                    hit(15);
                 }
+            } else {
+                hit(16);
             }
+
             if (palette.length() == 2) {
+                hit(17);
                 final int rgb = palette.getEntry(1);
                 if (rgb != 0 && rgb != 0xffffff) {
+                    hit(18);
                     onlyBlackAndWhite = false;
+                } else {
+                    hit(19);
                 }
+            } else {
+                hit(20);
             }
+
             if (onlyBlackAndWhite) {
+                hit(21);
                 bitDepth = 1;
                 planes = 1;
             } else {
+                hit(22);
                 bitDepth = 1;
                 planes = 2;
             }
@@ -174,8 +208,11 @@ final class PcxWriter {
 
         int bytesPerLine = (bitDepth * src.getWidth() + 7) / 8;
         if (bytesPerLine % 2 != 0) {
+            hit(23);
             // must be even:
             bytesPerLine++;
+        } else {
+            hit(24);
         }
 
         final byte[] palette16 = new byte[16 * 3];
@@ -184,8 +221,10 @@ final class PcxWriter {
         for (int i = 0; i < 16; i++) {
             final int rgb;
             if (i < paletteLen) {
+                hit(25);
                 rgb = palette.getEntry(i);
             } else {
+                hit(26);
                 rgb = 0;
             }
             palette16[3 * i + 0] = (byte) (0xff & rgb >> 16);
@@ -214,25 +253,32 @@ final class PcxWriter {
         bos.write(new byte[54]);
 
         if (bitDepth == 32) {
+            hit(27);
             writePixels32(src, bytesPerLine, bos);
         } else {
+            hit(28);
             writePixels(src, bitDepth, planes, bytesPerLine, palette, bos);
         }
 
         if (bitDepth == 8 && planes == 1) {
+            hit(29);
             // 256 color palette
             bos.write(12);
             for (int i = 0; i < 256; i++) {
                 final int rgb;
                 if (i < palette.length()) {
+                    hit(30);
                     rgb = palette.getEntry(i);
                 } else {
+                    hit(31);
                     rgb = 0;
                 }
                 bos.write(rgb >> 16 & 0xff);
                 bos.write(rgb >> 8 & 0xff);
                 bos.write(rgb & 0xff);
             }
+        } else {
+            hit(32);
         }
     }
 
