@@ -284,7 +284,7 @@ public class PngImageParser extends AbstractImageParser<PngImagingParameters> im
     /**
      * Holds physical dimension information.
      */
-    private static class PhysicalInfo {
+    private static final class PhysicalInfo {
         int physicalWidthDpi = -1;
         int physicalHeightDpi = -1;
         float physicalWidthInch = -1;
@@ -618,9 +618,10 @@ public class PngImageParser extends AbstractImageParser<PngImagingParameters> im
         final String formatDetails = "Png";
         final ImageInfo.CompressionAlgorithm compressionAlgorithm = ImageInfo.CompressionAlgorithm.PNG_FILTER;
 
-        return new PngImageInfo(formatDetails, bitsPerPixel, comments, format, formatName, height, mimeType, numberOfImages, physicalInfo.physicalHeightDpi,
-                physicalInfo.physicalHeightInch, physicalInfo.physicalWidthDpi, physicalInfo.physicalWidthInch, width, progressive, transparent, usesPalette, colorType, compressionAlgorithm,
-                textChunks, physicalScale);
+        return new PngImageInfo(formatDetails, bitsPerPixel, comments, format, formatName, height, mimeType,
+                numberOfImages, physicalInfo.physicalHeightDpi, physicalInfo.physicalHeightInch,
+                physicalInfo.physicalWidthDpi, physicalInfo.physicalWidthInch, width, progressive, transparent,
+                usesPalette, colorType, compressionAlgorithm, textChunks, physicalScale);
     }
 
     @Override
