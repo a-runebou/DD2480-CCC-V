@@ -52,7 +52,7 @@ To visualize the code instrumentation: `git diff master issue/12`
 ## Task 2: Coverage improvement for `readBits`
 Linked issue: [issue/18](https://github.com/a-runebou/DD2480-CCC-V/issues/18)
 
-The class `BitInputStream.java` (located in `formats/tiff/datareaders`) did not have any dedicated unit tests, therefore expanding on existing tests was impossible. 
+The class `BitInputStream.java` (located in `formats/tiff/datareaders`) did not have any dedicated unit tests, therefore expanding on existing tests was impossible.
 New tests were written in a dedicated test file.
 The function is public, so it could be called directly, and no additional interfaces were needed to be implemented. 
 The only data structure needed was the input stream, which was fairly easy to create.
@@ -65,3 +65,58 @@ The new coverage reported by JaCoCo:
 ![New Coverage](/assets/coverage/readBits/read_bits_new_coverage.png)
 
 To visualize the code changes: `git diff master issue/18`
+
+## Task 3: Refactoring of `readBits`
+Linked issue: [issue/24](https://github.com/a-runebou/DD2480-CCC-V/issues/24)
+
+The original cyclomatic complexity (as reported by `lizard`) is 20.
+### Refactoring plan
+Change the switch
+```
+switch (count) {
+case 1:
+    return bits & 1;
+case 2:
+    return bits & 3;
+case 3:
+    return bits & 7;
+case 4:
+    return bits & 15;
+case 5:
+    return bits & 31;
+case 6:
+    return bits & 63;
+case 7:
+    return bits & 127;
+}
+```
+for just one line of code, as each case can described with `pow(2,count)-1 = (1 << count)-1`. This should reduce the complexity considerably.The first IF statement needs to be changed slightly, to not allow for counts <= 0.
+
+The second part of `readBits`, which implements the function of reading whole bytes, can also be refactored. As this part implements a fairly separate functionality, creating a new method for reading whole bytes is a good choice, as it will also reduce the complexity.
+```
+if (byteOrder == ByteOrder.BIG_ENDIAN) {
+    switch (count) {
+    case 16:
+        bytesRead += 2;
+        return in.read() << 8 | in.read() << 0;
+...
+```
+Furthermore, the function can be rewritten in order to get rid of the switch statement.
+If we introduce another variable in which to store the result, we can read any number of bytes as
+```
+int result = 0
+for (int i = 0; i < numberOfBytes; i++>) {
+    result = (result << 8) | in.read();
+}
+```
+for Big Endian, and `result = result | (in.read << (8*i))` for Little Endian.
+This will further reduce the complexity of the introduced second function.
+
+The expected complexity of `readBits` is 6, as we get rid of both switch statements and one IF, reducing the function by $7+6+1 = 14$ decisions.
+
+## Final complexity
+The complexity of readBits was reduced down to 7 from the original 20.
+Our expectation was correct, only we added one check in the form of an IF statement for valid values which was not present in the original implementation.
+This added one more decisions.
+
+To see the refactoring changes: `git diff master issue/24`
