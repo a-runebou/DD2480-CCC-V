@@ -89,6 +89,35 @@ Related issue: [issues/7](https://github.com/a-runebou/DD2480-CCC-V/issues/7)
 **Is the documentation of the function clear about the different possible outcomes induced by different branches taken?**
 > The documentation of the `unpackFloatingPointSamples` function is quite comprehensive and clear. It has extensive Javadoc comments that explain the purpose (unpacking floating-point data from TIFF files), detailed parameter descriptions (width, height, scanSize, bytes, bitsPerPixel, byteOrder), return value explanation (array of integers in IEEE-754 32-bit float format), and potential exceptions (`ImagingException` for invalid formats). The documentation also explains the different supported formats (32-bit and 64-bit floating point) and processing modes (tile vs strip formats).
 
+### Function 3: `performNextMedianCut` (Josef Kahoun & Carl Isaksson)
+
+Related issue: [issue/4](https://github.com/a-runebou/DD2480-CCC-V/issues/4)
+
+**What are your results? Did everyone get the same result? Is there something that is unclear? If you have a tool, is its result the same as yours?**
+
+> Both of us counted the CCN to be `21`, which corresponds with the result from the tool `lizard`.
+There was some uncertainty as to what counts as a decision, for example if an IF statement with a logical operation (`IF (a AND b)`) counts as 2 or 1 decisions.
+This complexity was counted as `number of decisions + 1`, which is the formula that lizard uses.
+Were we to use the theoretical complexity, we get CCN of ${num\_of\_decisions} - {num\_of\_returns} + 2 = 20 - 4 + 2 = 18$.
+
+**Are the functions/methods with high CC also very long in terms of LOC?**
+
+> Not necessarily, a short function can have a high complexity, an example would be a function containing a switch statement. Likewise, a very long function can have low complexity, if it does not have a large amount of decisions.
+
+**What is the purpose of these functions? Is it related to the high CC?**
+> The function `performNextMedianCut` performs one iteration of the Median Cut color quantization algorithm, which aims to reduce the number of colors in an image by repeatedly splitting the color space.
+One iteration splits the colors into 2 regions with the best balance.
+The high complexity corresponds with the function's purpose, as it requires nested for loops, and multiple conditionals to check different color components and median edge cases.
+
+**If your programming language uses exceptions: Are they taken into account by the tool? If you think of an exception as another possible branch (to the catch block or the end of the function), how is the CC affected?**
+
+> No, the tool does not take into account exceptions, as it only looks for decision points.
+However, the `catch` keyword is counted as an additional decision.
+If the tool took exceptions and returns into account, we would obtain the theoretical complexity of 18, as discussed in the first question.
+
+**Is the documentation of the function clear about the different possible outcomes induced by different branches taken?**
+> The function `performNextMedianCut` lacks any sort of documentation, either in the form of Javadoc or normal comments.
+Therefore the different outcomes are not very clear, and had to be deduced from the source code.
 
 ## Refactoring
 
