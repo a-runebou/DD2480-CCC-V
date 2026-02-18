@@ -78,6 +78,11 @@ public class PngImageParser extends AbstractImageParser<PngImagingParameters> im
     private static final String DEFAULT_EXTENSION = ImageFormats.PNG.getDefaultExtension();
     private static final String[] ACCEPTED_EXTENSIONS = ImageFormats.PNG.getExtensions();
 
+    private static final ChunkType[] IMAGE_INFO_CHUNKS = {
+            ChunkType.IHDR, ChunkType.pHYs, ChunkType.sCAL, ChunkType.tEXt,
+            ChunkType.zTXt, ChunkType.tRNS, ChunkType.PLTE, ChunkType.iTXt
+    };
+
     /**
      * Gets the chunk type name from chunk type integer.
      *
@@ -417,8 +422,7 @@ public class PngImageParser extends AbstractImageParser<PngImagingParameters> im
 
     @Override
     public ImageInfo getImageInfo(final ByteSource byteSource, final PngImagingParameters params) throws ImagingException, IOException {
-        final List<PngChunk> chunks = readChunks(byteSource, new ChunkType[] { ChunkType.IHDR, ChunkType.pHYs, ChunkType.sCAL, ChunkType.tEXt, ChunkType.zTXt,
-                ChunkType.tRNS, ChunkType.PLTE, ChunkType.iTXt, }, false);
+        final List<PngChunk> chunks = readChunks(byteSource, IMAGE_INFO_CHUNKS, false);
 
         if (chunks.isEmpty()) {
             throw new ImagingException("PNG: no chunks");
