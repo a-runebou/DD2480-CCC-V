@@ -223,6 +223,7 @@ git diff master issue/12 src/main/java/org/apache/commons/imaging/formats/tiff/d
    Yes, the results are consistent with the JaCoCo coverage. 
 
 ## Coverage improvement
+
 ### Function 1: `readBits`
 Related issue: [issue/18](https://github.com/a-runebou/DD2480-CCC-V/issues/18)
 
@@ -239,7 +240,35 @@ The new coverage reported by JaCoCo:
 ![New Coverage](/assets/coverage/readBits/read_bits_new_coverage.png)
 
 To visualize the code changes: `git diff master issue/18`
-### 
+
+
+### Function 2: `PngImageParser#getImageInfo`
+Related issue: [#Issue 19](https://github.com/a-runebou/DD2480-CCC-V/issues/19)
+### Evidence (before/after)
+- Old coverage evidence: [Before](https://github.com/a-runebou/DD2480-CCC-V/issues/19#issuecomment-3923767448)
+- New coverage evidence: [After](https://github.com/a-runebou/DD2480-CCC-V/issues/19#issuecomment-3923764755)
+
+### Improvement:
+From the JaCoCo reports, branch coverage for `getImageInfo` improved from **83% to 96%** (instruction coverage **89% to 97%**), mainly by adding tests that trigger previously untested error/edge branches.
+
+### Tests added 
+Added targeted tests to include missing branches in `getImageInfo`, such as:
+- `testChunksEmpty()` 
+- `testbadIHDRCount()` 
+- `testMultiPHYS()` 
+- `testMultiSCAL()` 
+- `testNoPalette()` 
+
+To visualize the code changes:
+  ```bash
+  git diff origin/master..issue/19 -- \
+    src/main/java/org/apache/commons/imaging/formats/png/PngImageParser.java
+   ```
+
+
+
+
+
 Show the comments that describe the requirements for the coverage.
 
 Report of old coverage: [link]
