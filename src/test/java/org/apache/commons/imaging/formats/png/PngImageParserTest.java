@@ -110,6 +110,37 @@ class PngImageParserTest extends AbstractPngTest {
         assertEquals("PNG contains more than one pHYs: 2", exception.getMessage());
     }
 
+    /**
+     * Test GII_06_TRUE_multiSCAL_throw: getImageInfo throws exception when more than one sCAL chunk exists.
+     * Creates a PNG with two sCAL chunks to trigger the exception.
+     */
+    @Test
+    void testMultiSCAL() {
+        final byte[] pngWithTwoSCAL = {
+                (byte) 0x89, 'P', 'N', 'G', '\r', '\n', 0x1A, '\n',
+                0x00, 0x00, 0x00, 0x0D,
+                'I', 'H', 'D', 'R',
+                0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+                0x08, 0x02, 0x00, 0x00, 0x00,
+                (byte) 0x90, 0x77, 0x53, (byte) 0xDE,
+                0x00, 0x00, 0x00, 0x09,
+                's', 'C', 'A', 'L',
+                0x01, '1', 0x00, '1', 0x00, 0x00, 0x00, 0x00, 0x00,
+                (byte) 0xC2, (byte) 0x96, 0x49, (byte) 0xAC,
+                0x00, 0x00, 0x00, 0x09,
+                's', 'C', 'A', 'L',
+                0x01, '1', 0x00, '1', 0x00, 0x00, 0x00, 0x00, 0x00,
+                (byte) 0xC2, (byte) 0x96, 0x49, (byte) 0xAC,
+                0x00, 0x00, 0x00, 0x00,
+                'I', 'E', 'N', 'D',
+                (byte) 0xAE, 0x42, 0x60, (byte) 0x82
+        };
+
+        final ImagingException exception = assertThrows(ImagingException.class,
+                () -> new PngImageParser().getImageInfo(pngWithTwoSCAL, null));
+        assertEquals("PNG contains more than one sCAL:2", exception.getMessage());
+    }
+
     private static byte[] getPngImageBytes(final BufferedImage image, final PngImagingParameters params) throws IOException {
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             new PngWriter().writeImage(image, os, params, null);
