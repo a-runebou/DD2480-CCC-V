@@ -34,10 +34,7 @@ Description: Apache Commons Imaging is an open-source Java library that provides
 
 Did it build and run as documented?
     
-See the assignment for details; if everything works out of the box,
-there is no need to write much here. If the first project(s) you picked
-ended up being unsuitable, you can describe the "onboarding experience"
-for each project, along with reason(s) why you changed to a different one.
+The project builds and runs as expected using `mvn`. However, we had some struggles with finding suitable functions for the later parts of the assignment. For example, there were dead branches which can't possibly be covered by tests, and many functions uses complex input which is hard to generate for testing.
 
 
 ## Complexity
