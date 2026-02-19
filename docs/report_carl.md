@@ -21,3 +21,38 @@ The new coverage reported by JaCoCo:
 ![New Coverage](/assets/coverage//writeImage_new_coverage.png)
 
 To visualize the code changes: `git diff master issue/25`
+
+## Task 3: Refactoring of `writeImage`
+Linked issue: [issue/28](https://github.com/a-runebou/DD2480-CCC-V/issues/28)
+
+The original cyclomatic complexity (as reported by lizard) was 33.
+
+### Refactoring plan
+The majority of the complexity was concentrated in the large conditional block responsible for determining bitDepth and planes:
+
+if (palette == null || bitDepthWanted == 24 || bitDepthWanted == 32) {
+    ...
+} else if (palette.length() > 16 || bitDepthWanted == 8) {
+    ...
+} else if (palette.length() > 8 || bitDepthWanted == 4) {
+    ...
+}
+...
+
+To reduce complexity, this entire decision structure was moved into a separate helper method:
+
+private int[] determineBitDepthAndPlanes(SimplePalette palette)
+
+This method covers all branching related to bit depth and planes and returns the result as an integer array
+ {bitDepth, planes}. By moving the full decision tree into a separate method, the cyclomatic complexity of writeImage was expected to drop significantly, since all major conditional branches were relocated.
+
+## Final complexity
+ The cyclomatic complexity of writeImage was reduced from 33 to 12, according to lizard.
+
+ To see the refactoring changes: `git diff master issue/28`
+
+
+
+
+
+
