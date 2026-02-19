@@ -353,6 +353,11 @@ Right now, our team is in the `Working Well` state. By changing our method of op
 
 ## Overall experience
 
-What are your main take-aways from this project? What did you learn?
+**What are your main take-aways from this project? What did you learn?**
+- We learned how to calculate cyclomatic complexity both manually and using tools, and we saw how tools can yield different results based on their assumptions.
+- We gained experience in refactoring complex functions to reduce their cyclomatic complexity, which improved code readability and maintainability.
+- We learned a lot from working on a open-source project, including navigating a large codebase, understanding existing code, and how checkstyle and JaCoCo work in practice.
 
-Is there something special you want to mention here?
+**Is there something special you want to mention here?**
+- We found this assignment more time-consuming than expected, especially since we did not have much prior experience with the codebase or checkstyle.
+- The report also felt a bit rushed, and chaotic since so much documentation needed to be gathered into one place.
